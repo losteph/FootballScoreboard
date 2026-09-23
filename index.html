@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Steph Scoreboard</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #121929;
+      --card-sub: #1a233a;
+      --card-accent: #24304f;
+      --home-color: #3b82f6;
+      --away-color: #ef4444;
+      --accent-green: #10b981;
+      --accent-yellow: #f59e0b;
+      --accent-red: #ef4444;
+      --accent-purple: #8b5cf6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #24304f;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: clamp(6px, 2vw, 16px);
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(8px, 2vw, 14px);
+    }
+
+    /* Header & Timer */
+    .header {
+      background: linear-gradient(145deg, var(--card-bg), var(--card-sub));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: clamp(10px, 2.5vw, 16px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .period-badge {
+      background: var(--card-accent);
+      color: var(--accent-green);
+      font-weight: 800;
+      font-size: clamp(0.68rem, 1.8vw, 0.78rem);
+      padding: 4px 8px;
+      border-radius: 8px;
+      text-transform: uppercase;
+      border: 1px solid var(--border);
+    }
+
+    .format-badge {
+      background: rgba(139, 92, 246, 0.15);
+      color: var(--accent-purple);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      font-weight: 800;
+      font-size: clamp(0.68rem, 1.8vw, 0.78rem);
+      padding: 4px 8px;
+      border-radius: 8px;
+    }
+
+    .timer-display {
+      font-family: "Courier New", Courier, monospace;
+      font-size: clamp(2rem, 7vw, 2.7rem);
+      font-weight: 900;
+      color: var(--accent-green);
+      letter-spacing: 1px;
+      text-shadow: 0 0 12px rgba(16, 185, 129, 0.25);
+    }
+
+    .timer-display.danger {
+      color: var(--accent-red);
+      animation: pulse 0.8s infinite;
+      text-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.75; transform: scale(1.02); }
+    }
+
+    /* Config Bar */
+    .config-bar {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: var(--card-bg);
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      font-size: 0.75rem;
+    }
+
+    .config-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .config-inputs {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .config-inputs input[type="number"] {
+      background: var(--card-sub);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 4px 6px;
+      border-radius: 6px;
+      font-weight: bold;
+      outline: none;
+      font-size: 0.75rem;
+      width: 44px;
+      text-align: center;
+    }
+
+    .toggle-group {
+      display: flex;
+      background: var(--card-sub);
+      padding: 2px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .toggle-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      padding: 4px 8px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .toggle-btn.active {
+      background: var(--accent-green);
+      color: #022c22;
+    }
+
+    /* Scoreboard */
+    .scoreboard {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(6px, 2vw, 12px);
+    }
+
+    .team-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-top: 5px solid var(--team-border-color, #3b82f6);
+      border-radius: 16px;
+      padding: clamp(8px, 2vw, 14px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+
+    .team-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .team-name-input {
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-size: clamp(0.85rem, 2.5vw, 1.05rem);
+      font-weight: 800;
+      text-align: center;
+      width: 100%;
+      text-transform: uppercase;
+      outline: none;
+    }
+
+    .score-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1;
+    }
+
+    .score-num {
+      font-size: clamp(3rem, 10vw, 4.2rem);
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .score-penalties {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: var(--accent-yellow);
+      margin-top: 4px;
+    }
+
+    .team-actions {
+      display: flex;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .btn-goal {
+      flex: 2;
+      background: var(--accent-green);
+      color: #022c22;
+      border: none;
+      padding: clamp(6px, 1.8vw, 10px) 0;
+      border-radius: 10px;
+      font-weight: 900;
+      font-size: clamp(0.75rem, 2vw, 0.9rem);
+      cursor: pointer;
+    }
+
+    .btn-minus {
+      flex: 1;
+      background: var(--card-sub);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    /* Controls Bar & Periods */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 6px;
+    }
+
+    .period-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    .btn-main {
+      background: var(--accent-green);
+      color: #022c22;
+      font-weight: 900;
+      font-size: clamp(0.75rem, 2vw, 0.85rem);
+      border: none;
+      padding: clamp(8px, 2vw, 12px);
+      border-radius: 12px;
+      cursor: pointer;
+      text-transform: uppercase;
+    }
+
+    .btn-main.paused {
+      background: var(--accent-yellow);
+      color: #451a03;
+    }
+
+    .btn-sec {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      font-weight: 700;
+      font-size: clamp(0.68rem, 1.8vw, 0.78rem);
+      border-radius: 10px;
+      cursor: pointer;
+      padding: 8px 2px;
+      text-align: center;
+    }
+
+    .btn-sec.active-period {
+      background: var(--accent-green);
+      color: #022c22;
+      border-color: var(--accent-green);
+      font-weight: 900;
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--accent-red);
+      font-weight: 700;
+      font-size: clamp(0.72rem, 1.9vw, 0.82rem);
+      border-radius: 12px;
+      cursor: pointer;
+    }
+
+    /* Roster Dual Columns */
+    .roster-section {
+      display: grid;
+      grid-template-columns: 1fr; /* Default per smartphone: colonna singola */
+      gap: 10px;
+      align-items: start;
+    }
+
+    @media (min-width: 520px) {
+      .roster-section {
+        grid-template-columns: 1fr 1fr; /* Da 520px in su (PC o tablet): affiancate */
+      }
+    }
+
+    .roster-card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--team-border-color, var(--border));
+      border-top: 5px solid var(--team-border-color, #3b82f6);
+      border-radius: 14px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+
+    .roster-card.home {
+      --team-border-color: var(--home-color);
+    }
+
+    .roster-card.away {
+      --team-border-color: var(--away-color);
+    }
+
+    .roster-title {
+      font-size: clamp(0.7rem, 2vw, 0.8rem);
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 6px;
+    }
+
+    .player-list {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .player-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--card-sub);
+      padding: 6px 8px;
+      border-radius: 8px;
+      font-size: clamp(0.7rem, 2vw, 0.8rem);
+      border: 1px solid var(--border);
+      gap: 4px;
+    }
+
+    .player-row.bench-mode {
+      opacity: 0.65;
+      border-style: dashed;
+    }
+
+    .player-left-info {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+      cursor: pointer;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .player-left-info:hover {
+      opacity: 0.8;
+    }
+
+    .player-num-tag {
+      font-weight: 900;
+      color: var(--accent-green);
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+
+    .status-toggle {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 3px 6px;
+      border-radius: 6px;
+      font-size: 0.65rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .status-toggle.field {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--accent-green);
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-icon-del {
+      background: transparent;
+      border: none;
+      color: var(--accent-red);
+      font-size: 0.8rem;
+      cursor: pointer;
+      padding: 2px 4px;
+    }
+
+    .add-player-row {
+      display: flex;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .add-player-row input {
+      background: var(--card-sub);
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 6px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      outline: none;
+    }
+
+    .btn-add-mini {
+      background: var(--accent-green);
+      color: #022c22;
+      border: none;
+      font-weight: 900;
+      padding: 0 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    /* Live Events List */
+    .events-section {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .events-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .events-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .event-item {
+      background: var(--card-sub);
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: clamp(0.72rem, 2vw, 0.82rem);
+    }
+
+    .event-minute {
+      font-family: monospace;
+      font-weight: 800;
+      color: var(--accent-green);
+      background: rgba(16, 185, 129, 0.1);
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+
+    /* Bottom Actions */
+    .action-grid-bottom {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .btn-action-main {
+      background: var(--accent-purple);
+      color: #fff;
+      font-weight: 900;
+      font-size: 0.8rem;
+      border: none;
+      padding: 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(5px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 12px;
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 440px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-content input, .modal-content select {
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+
+    .modal-title {
+      font-size: 1.05rem;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .form-group label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .custom-select, .form-group input {
+      background: var(--card-sub);
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 9px 12px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .sub-box {
+      border: 1px solid var(--border);
+      background: rgba(26, 35, 58, 0.4);
+      padding: 10px;
+      border-radius: 10px;
+      margin-top: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .action-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .btn-act {
+      padding: 10px;
+      border-radius: 9px;
+      border: none;
+      font-weight: 800;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+
+    .history-card {
+      background: var(--card-sub);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Top Header -->
+    <div class="header">
+      <div class="header-left">
+        <div class="badge-row">
+          <span class="period-badge" id="period-badge">1° Tempo</span>
+          <span class="format-badge" id="format-badge">11 vs 11</span>
+        </div>
+        <span style="font-size:0.65rem; color:var(--text-muted);" id="timer-status-text">Conto alla Rovescia</span>
+      </div>
+      <div class="timer-display" id="timer-display">15:00</div>
+    </div>
+
+    <!-- Timer Settings Bar -->
+    <div class="config-bar">
+      <div class="config-row">
+        <span style="font-weight:700; color:var(--text-muted);">Modalità Timer:</span>
+        <div class="toggle-group">
+          <button id="mode-down" class="toggle-btn active" onclick="setTimerMode('countdown')">Rovescia ⏳</button>
+          <button id="mode-up" class="toggle-btn" onclick="setTimerMode('countup')">Avanti ⏱️</button>
+        </div>
+      </div>
+      <div class="config-row">
+        <span style="font-weight:700; color:var(--text-muted);">Durata Tempo:</span>
+        <div class="config-inputs">
+          <input type="number" id="input-minutes" value="15" min="0" max="90">m
+          <input type="number" id="input-seconds" value="00" min="0" max="59">s
+          <button onclick="applyDurationSettings()" class="btn-sec" style="padding:4px 8px; font-size:0.7rem;">Set</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scoreboard -->
+    <div class="scoreboard">
+      <!-- Casa -->
+      <div class="team-card home" id="card-home">
+        <div class="team-header-row">
+          <input type="color" id="picker-home" value="#3b82f6" style="width:20px;height:20px;border:none;background:none;cursor:pointer;" onchange="updateColors()">
+          <input type="text" id="name-home" value="CASA" class="team-name-input" onchange="saveState()">
+        </div>
+        <div class="score-container">
+          <div class="score-num" id="score-home">0</div>
+          <div class="score-penalties" id="pen-home" style="display:none;">(Rig: 0)</div>
+        </div>
+        <div class="team-actions">
+          <button class="btn-goal" onclick="quickGoal('home')">⚽ +GOL</button>
+          <button class="btn-minus" onclick="promptMinusGoal('home')">-</button>
+        </div>
+      </div>
+
+      <!-- Ospiti -->
+      <div class="team-card away" id="card-away">
+        <div class="team-header-row">
+          <input type="color" id="picker-away" value="#ef4444" style="width:20px;height:20px;border:none;background:none;cursor:pointer;" onchange="updateColors()">
+          <input type="text" id="name-away" value="OSPITI" class="team-name-input" onchange="saveState()">
+        </div>
+        <div class="score-container">
+          <div class="score-num" id="score-away">0</div>
+          <div class="score-penalties" id="pen-away" style="display:none;">(Rig: 0)</div>
+        </div>
+        <div class="team-actions">
+          <button class="btn-goal" onclick="quickGoal('away')">⚽ +GOL</button>
+          <button class="btn-minus" onclick="promptMinusGoal('away')">-</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls Bar -->
+    <div class="controls-grid">
+      <button class="btn-main" id="btn-start" onclick="toggleTimer()">▶ Avvia</button>
+      <button class="btn-danger" onclick="confirmResetOnly()">🔄 Reset</button>
+      <button class="btn-action-main" style="background:var(--accent-red); margin:0;" onclick="confirmEndMatch()">🏁 Fine</button>
+    </div>
+
+    <!-- Period Selectors -->
+    <div class="period-grid">
+      <button class="btn-sec active-period" id="p-btn-1" onclick="selectPeriod(1, '1° Tempo')">1°T</button>
+      <button class="btn-sec" id="p-btn-2" onclick="selectPeriod(2, '2° Tempo')">2°T</button>
+      <button class="btn-sec" id="p-btn-3" onclick="selectPeriod(3, '1° TS')">1°TS</button>
+      <button class="btn-sec" id="p-btn-4" onclick="selectPeriod(4, '2° TS')">2°TS</button>
+      <button class="btn-sec" id="p-btn-5" onclick="selectPeriod(5, 'Rigori')">RIG</button>
+    </div>
+
+    <!-- Dual Team Rosters -->
+    <div class="roster-section">
+      <!-- Casa Roster -->
+      <div class="roster-card home" id="roster-card-home">
+        <div class="roster-title">
+          <span>Squadra Casa</span>
+          <span id="count-home" style="color:var(--accent-green);">11 Titolari</span>
+        </div>
+        <div class="player-list" id="list-home"></div>
+        <div class="add-player-row">
+          <input type="text" id="in-home-num" placeholder="#" style="width:30px; text-align:center;">
+          <input type="text" id="in-home-name" placeholder="Nome" style="flex:1;">
+          <button class="btn-add-mini" onclick="addPlayer('home')">+</button>
+        </div>
+      </div>
+
+      <!-- Ospiti Roster -->
+      <div class="roster-card away" id="roster-card-away">
+        <div class="roster-title">
+          <span>Squadra Ospiti</span>
+          <span id="count-away" style="color:var(--accent-green);">11 Titolari</span>
+        </div>
+        <div class="player-list" id="list-away"></div>
+        <div class="add-player-row">
+          <input type="text" id="in-away-num" placeholder="#" style="width:30px; text-align:center;">
+          <input type="text" id="in-away-name" placeholder="Nome" style="flex:1;">
+          <button class="btn-add-mini" onclick="addPlayer('away')">+</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Event Feed -->
+    <div class="events-section">
+      <div class="events-header">
+        <span>Cronaca Live</span>
+        <span id="event-count" style="font-size:0.7rem;">0 Eventi</span>
+      </div>
+      <div class="events-list" id="events-list">
+        <div style="color:var(--text-muted); font-size:0.75rem; text-align:center; padding:8px;">Nessun evento registrato.</div>
+      </div>
+    </div>
+
+    <!-- Bottom Actions -->
+    <div class="action-grid-bottom">
+      <button class="btn-action-main" style="background:#0ea5e9;" onclick="openHistoryModal()">📚 Storico Partite</button>
+      <button class="btn-action-main" onclick="shareCurrentMatch()">📲 Condividi Tabellino</button>
+    </div>
+
+  </div>
+
+  <!-- MODAL AZIONE GIOCATORE & SOSTITUZIONE -->
+  <div class="modal-overlay" id="action-modal">
+    <div class="modal-content">
+      <div class="modal-title" id="modal-player-title">⚽ Azione Giocatore</div>
+      
+      <div style="display:flex; gap:8px; width:100%;">
+        <div class="form-group" style="width:55px; flex-shrink:0;">
+          <label>N°</label>
+          <input type="text" id="modal-p-num" maxlength="3" style="text-align:center; padding:9px 4px;">
+        </div>
+        <div class="form-group" style="flex:1; min-width:0;">
+          <label>Nome Giocatore</label>
+          <input type="text" id="modal-p-name" style="width:100%;">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Assistito da (Opzionale)</label>
+        <select id="modal-p-assist" class="custom-select"><option value="">Nessun Assist</option></select>
+      </div>
+
+      <!-- Action Grid Buttons -->
+      <div class="action-grid">
+        <button class="btn-act" style="background:var(--accent-green); color:#022c22;" onclick="triggerAction('GOL')">⚽ Gol</button>
+        <button class="btn-act" style="background:#059669; color:#fff;" onclick="triggerAction('RIGORE_SEGNATO')">👟 Rigore Segnato</button>
+        <button class="btn-act" style="background:#0284c7; color:#fff;" onclick="triggerAction('RIGORE_PARATO')">🧤 Rigore Parato</button>
+        <button class="btn-act" style="background:var(--accent-yellow); color:#451a03;" onclick="triggerAction('GIALLO')">🟨 Ammonizione</button>
+        <button class="btn-act" style="background:var(--accent-red); color:#fff;" onclick="triggerAction('ROSSO')">🟥 Espulsione</button>
+        <button class="btn-act" style="background:var(--card-sub); border:1px solid var(--border); color:#fff;" onclick="triggerAction('FALLO')">⚠️ Fallo</button>
+        <button class="btn-act" style="background:#b91c1c; color:#fff; grid-column: span 2;" onclick="triggerAction('AUTOGOL')">⭕ Autogol</button>
+      </div>
+
+      <!-- Substitution Box -->
+      <div class="sub-box" id="sub-section">
+        <label style="font-size:0.7rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Effettua Sostituzione Ufficiale:</label>
+        <select id="modal-sub-target" class="custom-select"></select>
+        <button class="btn-sec" style="background:var(--accent-purple); color:#fff; border:none; padding:10px; font-weight:800; border-radius:8px;" onclick="executeSubstitution()">🔄 Sostituzione</button>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; gap:8px; margin-top:8px;">
+        <button class="btn-sec" style="flex:1; padding:8px;" onclick="closeModal('action-modal')">Chiudi</button>
+        <button class="btn-sec" style="flex:1; padding:8px; border-color:var(--accent-green);" onclick="savePlayerEdit()">💾 Salva Info</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL LISTA STORICO -->
+  <div class="modal-overlay" id="history-modal">
+    <div class="modal-content">
+      <div class="modal-title">📚 Storico Partite</div>
+      <div id="history-list-content"></div>
+      <button class="btn-sec" style="padding:10px;" onclick="closeModal('history-modal')">Chiudi</button>
+    </div>
+  </div>
+
+  <!-- MODAL DETTAGLIO PARTITA ARCHIVIATA -->
+  <div class="modal-overlay" id="match-detail-modal">
+    <div class="modal-content">
+      <div class="modal-title">Dettaglio Partita Archiviata</div>
+      
+      <div class="form-group">
+        <label>Titolo Partita:</label>
+        <input type="text" id="detail-title" style="font-weight:bold;">
+      </div>
+
+      <div style="background:var(--card-sub); border:1px solid var(--border); padding:12px; border-radius:12px; text-align:center;">
+        <div style="font-size:1.3rem; font-weight:900; color:#fff;" id="detail-score">CASA 0 - 0 OSPITI</div>
+        <div style="font-size:0.85rem; color:var(--accent-yellow); font-weight:bold;" id="detail-pen"></div>
+        <div style="font-size:0.7rem; color:var(--text-muted); margin-top:4px;" id="detail-date"></div>
+      </div>
+
+      <div class="form-group">
+        <label>Cronaca Completa:</label>
+        <div id="detail-events" style="display:flex; flex-direction:column; gap:4px; max-height:180px; overflow-y:auto; background:var(--card-sub); padding:8px; border-radius:8px; border:1px solid var(--border);"></div>
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-top:4px;">
+        <button class="btn-sec" style="background:var(--accent-green); color:#022c22; font-weight:bold; border:none; padding:8px;" onclick="saveRenamedHistory()">💾 Salva Modifiche</button>
+        <button class="btn-sec" style="background:var(--accent-purple); color:#fff; font-weight:bold; border:none; padding:8px;" onclick="shareArchivedMatch()">📲 Condividi</button>
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px;">
+        <button class="btn-danger" style="padding:8px;" onclick="deleteArchivedMatch()">🗑️ Elimina</button>
+        <button class="btn-sec" style="padding:8px;" onclick="closeModal('match-detail-modal')">Chiudi</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let timerInterval = null;
+    let durationSeconds = 15 * 60;
+    let currentSeconds = 15 * 60;
+    let timerMode = 'countdown';
+    let currentPeriod = 1;
+    let periodLabelText = '1° Tempo';
+    let homeScore = 0;
+    let awayScore = 0;
+    let homePenalties = 0;
+    let awayPenalties = 0;
+    let selectedPlayer = null;
+    let activeArchivedId = null;
+
+    let players = {
+      home: [
+        { id: 1, num: "1", name: "POR", inField: true },
+        { id: 2, num: "2", name: "TS", inField: true },
+        { id: 3, num: "3", name: "DC", inField: true },
+        { id: 4, num: "4", name: "DC", inField: true },
+        { id: 5, num: "5", name: "TD", inField: true },
+        { id: 6, num: "6", name: "CC", inField: true },
+        { id: 7, num: "7", name: "COC", inField: true },
+        { id: 8, num: "8", name: "CDC", inField: true },
+        { id: 9, num: "9", name: "ED", inField: true },
+        { id: 10, num: "10", name: "ES", inField: true },
+        { id: 11, num: "11", name: "ATT", inField: true },
+        { id: 12, num: "12", name: "Riserva", inField: false }
+      ],
+      away: [
+        { id: 101, num: "1", name: "POR", inField: true },
+        { id: 102, num: "2", name: "TS", inField: true },
+        { id: 103, num: "3", name: "DC", inField: true },
+        { id: 104, num: "4", name: "DC", inField: true },
+        { id: 105, num: "5", name: "TD", inField: true },
+        { id: 106, num: "6", name: "CC", inField: true },
+        { id: 107, num: "7", name: "COC", inField: true },
+        { id: 108, num: "8", name: "CDC", inField: true },
+        { id: 109, num: "9", name: "ED", inField: true },
+        { id: 110, num: "10", name: "ES", inField: true },
+        { id: 111, num: "11", name: "ATT", inField: true },
+        { id: 112, num: "12", name: "Riserva", inField: false }
+      ]
+    };
+
+    let events = [];
+    let matchHistory = JSON.parse(localStorage.getItem('match_history_v8') || '[]');
+
+    let alertLoopInterval = null;
+
+    function playEndAlert() {
+      // Ferma eventuali allarmi precedenti
+      stopEndAlert();
+      
+      const beep = () => {
+        try {
+          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+          gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.45);
+        } catch (e) {}
+
+        if (navigator.vibrate) {
+          try { navigator.vibrate([200, 100, 200]); } catch (e) {}
+        }
+      };
+
+      // Suona subito e ripete ogni secondo
+      beep();
+      alertLoopInterval = setInterval(beep, 500);
+    }
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60).toString().padStart(2, '0');
+      const s = (sec % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function getElapsedFormatted() {
+      if (currentPeriod === 5) return 'RIGORI';
+      if (timerMode === 'countdown') {
+        const elapsed = durationSeconds - currentSeconds;
+        return `${periodLabelText} ${formatTime(Math.max(0, elapsed))}`;
+      } else {
+        return `${periodLabelText} ${formatTime(currentSeconds)}`;
+      }
+    }
+
+    function updateTimerDisplay() {
+      const el = document.getElementById('timer-display');
+      if (currentPeriod === 5) {
+        el.textContent = "--:--";
+        el.classList.remove('danger');
+        return;
+      }
+      el.textContent = formatTime(currentSeconds);
+      if (timerMode === 'countdown' && currentSeconds <= 10 && currentSeconds > 0) {
+        el.classList.add('danger');
+      } else {
+        el.classList.remove('danger');
+      }
+    }
+
+    function setTimerMode(mode) {
+      if (timerMode === mode) return;
+      timerMode = mode;
+      document.getElementById('mode-down').classList.toggle('active', mode === 'countdown');
+      document.getElementById('mode-up').classList.toggle('active', mode === 'countup');
+      document.getElementById('timer-status-text').textContent = mode === 'countdown' ? 'Conto alla Rovescia' : 'In Avanti';
+      
+      // Converte il tempo senza azzerare
+      currentSeconds = Math.max(0, durationSeconds - currentSeconds);
+      updateTimerDisplay();
+      saveState();
+    }
+
+    function applyDurationSettings() {
+      const min = parseInt(document.getElementById('input-minutes').value) || 0;
+      const sec = parseInt(document.getElementById('input-seconds').value) || 0;
+      durationSeconds = (min * 60) + sec;
+      currentSeconds = timerMode === 'countdown' ? durationSeconds : 0;
+      updateTimerDisplay();
+      saveState();
+    }
+
+    function toggleTimer() {
+      if (currentPeriod === 5) {
+        alert("Nei Calci di Rigore il cronometro è disattivato.");
+        return;
+      }
+      const btn = document.getElementById('btn-start');
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        btn.textContent = '▶ Avvia';
+        btn.classList.remove('paused');
+      } else {
+        timerInterval = setInterval(() => {
+          if (timerMode === 'countdown') {
+            if (currentSeconds > 0) {
+              currentSeconds--;
+              updateTimerDisplay();
+            } else {
+              finishTimer();
+            }
+          } else {
+            if (currentSeconds < durationSeconds) {
+              currentSeconds++;
+              updateTimerDisplay();
+            } else {
+              finishTimer();
+            }
+          }
+          saveState();
+        }, 1000);
+        btn.textContent = '⏸ Pausa';
+        btn.classList.add('paused');
+      }
+    }
+
+    function stopEndAlert() {
+      if (alertLoopInterval) {
+        clearInterval(alertLoopInterval);
+        alertLoopInterval = null;
+      }
+    }
+
+    function finishTimer() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      const btn = document.getElementById('btn-start');
+      btn.textContent = '▶ Avvia';
+      btn.classList.remove('paused');
+      
+      playEndAlert();
+      setTimeout(() => {
+        alert(`⏰ FINE TEMPO (${periodLabelText})!`);
+        stopEndAlert();
+      }, 50);
+    }
+
+    function selectPeriod(num, label) {
+      const old = periodLabelText;
+      currentPeriod = num;
+      periodLabelText = label;
+      for (let i = 1; i <= 5; i++) {
+        document.getElementById(`p-btn-${i}`).classList.toggle('active-period', i === num);
+      }
+      document.getElementById('period-badge').textContent = label;
+      if (num === 5 && timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        document.getElementById('btn-start').textContent = '▶ Avvia';
+        document.getElementById('btn-start').classList.remove('paused');
+      }
+      if (num !== 5) {
+        applyDurationSettings();
+      } else {
+        updateTimerDisplay();
+      }
+      if (old !== label) {
+        logEvent(`⏱️ Inizio ${label}`, `🎙️ comunicato 📻`, getElapsedFormatted());
+      }
+    }
+
+    function quickGoal(team) {
+      const teamName = document.getElementById(`name-${team}`).value;
+      if (currentPeriod === 5) {
+        if (team === 'home') {
+          homePenalties++;
+          document.getElementById('pen-home').textContent = `(Rig: ${homePenalties})`;
+          document.getElementById('pen-home').style.display = 'block';
+        } else {
+          awayPenalties++;
+          document.getElementById('pen-away').textContent = `(Rig: ${awayPenalties})`;
+          document.getElementById('pen-away').style.display = 'block';
+        }
+        logEvent(`👟 Rigore Segnato (${teamName})`, `Sequenza Rigori`, getElapsedFormatted(), team, true, 'RIGORE_SEGNATO');
+      } else {
+        if (team === 'home') {
+          homeScore++;
+          document.getElementById('score-home').textContent = homeScore;
+        } else {
+          awayScore++;
+          document.getElementById('score-away').textContent = awayScore;
+        }
+        logEvent(`⚽ GOL`, `Squadra: ${teamName}`, getElapsedFormatted(), team, false, 'GOL');
+      }
+      saveState();
+    }
+
+    function promptMinusGoal(team) {
+      const isPen = currentPeriod === 5;
+      const targetList = events.filter(e => e.team === team && (isPen ? e.isPenalty : (!e.isPenalty && (e.type === 'GOL' || e.type === 'RIGORE_SEGNATO'))));
+      if (targetList.length === 0) {
+        if (isPen) {
+          if (team === 'home') { homePenalties = Math.max(0, homePenalties - 1); document.getElementById('pen-home').textContent = `(Rig: ${homePenalties})`; }
+          else { awayPenalties = Math.max(0, awayPenalties - 1); document.getElementById('pen-away').textContent = `(Rig: ${awayPenalties})`; }
+        } else {
+          if (team === 'home') { homeScore = Math.max(0, homeScore - 1); document.getElementById('score-home').textContent = homeScore; }
+          else { awayScore = Math.max(0, awayScore - 1); document.getElementById('score-away').textContent = awayScore; }
+        }
+        saveState();
+        return;
+      }
+      let txt = "Quale gol vuoi annullare?\n";
+      targetList.forEach((ev, idx) => { txt += `[${idx}] ${ev.minute} - ${ev.title}\n`; });
+      const sel = prompt(txt + "\nDigita il numero dell'evento:");
+      if (sel !== null && !isNaN(sel) && targetList[parseInt(sel)]) {
+        deleteEvent(targetList[parseInt(sel)].id);
+      }
+    }
+
+    function renderRosters() {
+      ['home', 'away'].forEach(team => {
+        const list = document.getElementById(`list-${team}`);
+        const activeCount = players[team].filter(p => p.inField).length;
+        document.getElementById(`count-${team}`).textContent = `${activeCount} Titolari`;
+
+        list.innerHTML = players[team].map((p, idx) => `
+          <div class="player-row ${p.inField ? '' : 'bench-mode'}">
+            <div class="player-left-info" onclick="openPlayerActionModal('${team}', ${idx})">
+              <span class="player-num-tag">#${p.num}</span>
+              <strong style="color:#fff;">${p.name}</strong>
+            </div>
+            <button class="status-toggle ${p.inField ? 'field' : ''}" onclick="togglePlayerStatus('${team}', ${idx})">
+              ${p.inField ? 'CAMPO' : 'PANCA'}
+            </button>
+            <button class="btn-icon-del" onclick="deletePlayer('${team}', ${idx})">✕</button>
+          </div>
+        `).join('');
+      });
+
+      const hCount = players.home.filter(p => p.inField).length;
+      const aCount = players.away.filter(p => p.inField).length;
+      document.getElementById('format-badge').textContent = `${hCount} vs ${aCount}`;
+    }
+
+    function togglePlayerStatus(team, idx) {
+      players[team][idx].inField = !players[team][idx].inField;
+      renderRosters();
+      saveState();
+    }
+
+    function addPlayer(team) {
+      const numIn = document.getElementById(`in-${team}-num`);
+      const nameIn = document.getElementById(`in-${team}-name`);
+      if (!nameIn.value.trim()) return;
+      players[team].push({
+        id: Date.now(),
+        num: numIn.value.trim() || '?',
+        name: nameIn.value.trim(),
+        inField: true
+      });
+      numIn.value = '';
+      nameIn.value = '';
+      renderRosters();
+      saveState();
+    }
+
+    function deletePlayer(team, idx) {
+      if (confirm("Rimuovere giocatore dalla rosa?")) {
+        players[team].splice(idx, 1);
+        renderRosters();
+        saveState();
+      }
+    }
+
+    function openPlayerActionModal(team, idx) {
+      selectedPlayer = { team, idx };
+      const p = players[team][idx];
+      const teamName = document.getElementById(`name-${team}`).value;
+      document.getElementById('modal-player-title').textContent = `⚽ #${p.num} ${p.name} (${teamName})`;
+      document.getElementById('modal-p-num').value = p.num;
+      document.getElementById('modal-p-name').value = p.name;
+
+      const assistSelect = document.getElementById('modal-p-assist');
+      assistSelect.innerHTML = '<option value="">Nessun Assist</option>';
+      players[team].forEach((mate, i) => {
+        if (i !== idx) {
+          assistSelect.innerHTML += `<option value="#${mate.num} ${mate.name}">#${mate.num} ${mate.name}</option>`;
+        }
+      });
+
+      const subSelect = document.getElementById('modal-sub-target');
+      subSelect.innerHTML = '';
+      if (p.inField) {
+        subSelect.innerHTML = '<option value="" disabled selected>Scambia con un panchinaro:</option>';
+        players[team].forEach((mate, i) => {
+          if (!mate.inField) {
+            subSelect.innerHTML += `<option value="${i}">Entra: #${mate.num} ${mate.name}</option>`;
+          }
+        });
+      } else {
+        subSelect.innerHTML = '<option value="" disabled selected>Scambia con un titolare in campo:</option>';
+        players[team].forEach((mate, i) => {
+          if (mate.inField) {
+            subSelect.innerHTML += `<option value="${i}">Esce: #${mate.num} ${mate.name}</option>`;
+          }
+        });
+      }
+
+      document.getElementById('action-modal').style.display = 'flex';
+    }
+
+    function executeSubstitution() {
+      if (!selectedPlayer) return;
+      const team = selectedPlayer.team;
+      const targetIdx = parseInt(document.getElementById('modal-sub-target').value);
+      if (isNaN(targetIdx)) return;
+
+      const pCurrent = players[team][selectedPlayer.idx];
+      const pTarget = players[team][targetIdx];
+      const teamName = document.getElementById(`name-${team}`).value;
+      const min = getElapsedFormatted();
+
+      pCurrent.inField = !pCurrent.inField;
+      pTarget.inField = !pTarget.inField;
+
+      const inPlayer = pCurrent.inField ? pCurrent : pTarget;
+      const outPlayer = pCurrent.inField ? pTarget : pCurrent;
+
+      logEvent(`🔄 Sostituzione`, `Entra #${inPlayer.num} ${inPlayer.name}, Esce #${outPlayer.num} ${outPlayer.name} (Squadra: ${teamName})`, min, team);
+
+      closeModal('action-modal');
+      renderRosters();
+      saveState();
+    }
+
+    function savePlayerEdit() {
+      if (!selectedPlayer) return;
+      const p = players[selectedPlayer.team][selectedPlayer.idx];
+      p.num = document.getElementById('modal-p-num').value.trim() || p.num;
+      p.name = document.getElementById('modal-p-name').value.trim() || p.name;
+      renderRosters();
+      saveState();
+      closeModal('action-modal');
+    }
+
+    function triggerAction(type) {
+      if (!selectedPlayer) return;
+      const team = selectedPlayer.team;
+      const p = players[team][selectedPlayer.idx];
+      const teamName = document.getElementById(`name-${team}`).value;
+      const assist = document.getElementById('modal-p-assist').value;
+      const min = getElapsedFormatted();
+      const isPen = currentPeriod === 5;
+
+      p.num = document.getElementById('modal-p-num').value.trim() || p.num;
+      p.name = document.getElementById('modal-p-name').value.trim() || p.name;
+      renderRosters();
+
+      if (type === 'GOL' || type === 'RIGORE_SEGNATO') {
+        if (isPen) {
+          if (team === 'home') { homePenalties++; document.getElementById('pen-home').textContent = `(Rig: ${homePenalties})`; document.getElementById('pen-home').style.display = 'block'; }
+          else { awayPenalties++; document.getElementById('pen-away').textContent = `(Rig: ${awayPenalties})`; document.getElementById('pen-away').style.display = 'block'; }
+          logEvent(`👟 Rigore Segnato da #${p.num} ${p.name}`, `Squadra: ${teamName}`, min, team, true, 'RIGORE_SEGNATO');
+        } else {
+          if (team === 'home') { homeScore++; document.getElementById('score-home').textContent = homeScore; }
+          else { awayScore++; document.getElementById('score-away').textContent = awayScore; }
+          let subText = `Squadra: ${teamName}`;
+          if (assist && type === 'GOL') subText += ` • 🅰️ Assist: ${assist}`;
+          logEvent(type === 'GOL' ? `⚽ GOL! #${p.num} ${p.name}` : `👟 RIGORE SEGNATO! #${p.num} ${p.name}`, subText, min, team, false, type);
+        }} else if (type === 'AUTOGOL') {
+        const opposingTeam = team === 'home' ? 'away' : 'home';
+        const opposingTeamName = document.getElementById(`name-${opposingTeam}`).value;
+        
+        if (opposingTeam === 'home') { homeScore++; document.getElementById('score-home').textContent = homeScore; }
+        else { awayScore++; document.getElementById('score-away').textContent = awayScore; }
+        
+        logEvent(`⭕ AUTOGOL! #${p.num} ${p.name}`, `A favore di: ${opposingTeamName} (Squadra autore: ${teamName})`, min, opposingTeam, false, 'AUTOGOL');
+      } else if (type === 'RIGORE_PARATO') {
+        logEvent(`🧤 Rigore Parato da #${p.num} ${p.name}`, `Squadra: ${teamName}`, min, team, isPen, 'RIGORE_PARATO');
+      } else if (type === 'GIALLO') {
+        logEvent(`🟨 Cartellino Giallo: #${p.num} ${p.name}`, `Squadra: ${teamName}`, min, team, false, 'GIALLO');
+      } else if (type === 'ROSSO') {
+        logEvent(`🟥 Cartellino Rosso (Espulso): #${p.num} ${p.name}`, `Squadra: ${teamName}`, min, team, false, 'ROSSO');
+      } else if (type === 'FALLO') {
+        logEvent(`⚠️ Fallo commesso da #${p.num} ${p.name}`, `Squadra: ${teamName}`, min, team, false, 'FALLO');
+      } 
+
+      closeModal('action-modal');
+      saveState();
+    }
+
+    function logEvent(title, sub, minute, team = null, isPenalty = false, type = 'OTHER') {
+      events.unshift({ id: Date.now(), title, sub, minute, team, isPenalty, type });
+      renderEvents();
+      saveState();
+    }
+
+    function renderEvents() {
+      const list = document.getElementById('events-list');
+      document.getElementById('event-count').textContent = `${events.length} Eventi`;
+      if (events.length === 0) {
+        list.innerHTML = '<div style="color:var(--text-muted); font-size:0.75rem; text-align:center; padding:8px;">Nessun evento registrato.</div>';
+        return;
+      }
+      list.innerHTML = events.map(e => `
+        <div class="event-item">
+          <div style="display:flex; flex-direction:column; gap:2px;">
+            <strong style="color:#fff;">${e.title}</strong>
+            <span style="color:var(--text-muted); font-size:0.7rem;">${e.sub}</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span class="event-minute">${e.minute}</span>
+            <button class="btn-icon-del" onclick="deleteEvent(${e.id})">✕</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function deleteEvent(id) {
+      const ev = events.find(e => e.id === id);
+      if (ev) {
+        if (ev.isPenalty && ev.type === 'RIGORE_SEGNATO') {
+          if (ev.team === 'home') { homePenalties = Math.max(0, homePenalties - 1); document.getElementById('pen-home').textContent = `(Rig: ${homePenalties})`; }
+          else { awayPenalties = Math.max(0, awayPenalties - 1); document.getElementById('pen-away').textContent = `(Rig: ${awayPenalties})`; }
+        } else if (!ev.isPenalty && (ev.type === 'GOL' || ev.type === 'RIGORE_SEGNATO' || ev.type === 'AUTOGOL')) {
+          if (ev.team === 'home') { homeScore = Math.max(0, homeScore - 1); document.getElementById('score-home').textContent = homeScore; }
+          else if (ev.team === 'away') { awayScore = Math.max(0, awayScore - 1); document.getElementById('score-away').textContent = awayScore; }
+        }
+      }
+      events = events.filter(e => e.id !== id);
+      renderEvents();
+      saveState();
+    }
+
+    function updateColors() {
+      const hColor = document.getElementById('picker-home').value;
+      const aColor = document.getElementById('picker-away').value;
+      document.documentElement.style.setProperty('--home-color', hColor);
+      document.documentElement.style.setProperty('--away-color', aColor);
+      document.getElementById('card-home').style.setProperty('--team-border-color', hColor);
+      document.getElementById('card-away').style.setProperty('--team-border-color', aColor);
+
+      const rHome = document.getElementById('roster-card-home');
+      const rAway = document.getElementById('roster-card-away');
+      if (rHome) rHome.style.setProperty('--team-border-color', hColor);
+      if (rAway) rAway.style.setProperty('--team-border-color', aColor);
+
+      saveState();
+    }
+
+    function confirmResetOnly() {
+      if (confirm("Resettare la partita senza salvarla nello storico?")) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        homeScore = 0; awayScore = 0; homePenalties = 0; awayPenalties = 0; events = [];
+        document.getElementById('score-home').textContent = '0';
+        document.getElementById('score-away').textContent = '0';
+        document.getElementById('pen-home').style.display = 'none';
+        document.getElementById('pen-away').style.display = 'none';
+        document.getElementById('btn-start').textContent = '▶ Avvia';
+        document.getElementById('btn-start').classList.remove('paused');
+        selectPeriod(1, '1° Tempo');
+        
+        // Ripristino formazioni standard (11 titolari con ruoli e riserva)
+        players = {
+          home: [
+            { id: 1, num: "1", name: "POR", inField: true },
+            { id: 2, num: "2", name: "TS", inField: true },
+            { id: 3, num: "3", name: "DC", inField: true },
+            { id: 4, num: "4", name: "DC", inField: true },
+            { id: 5, num: "5", name: "TD", inField: true },
+            { id: 6, num: "6", name: "CC", inField: true },
+            { id: 7, num: "7", name: "COC", inField: true },
+            { id: 8, num: "8", name: "CDC", inField: true },
+            { id: 9, num: "9", name: "ED", inField: true },
+            { id: 10, num: "10", name: "ES", inField: true },
+            { id: 11, num: "11", name: "ATT", inField: true },
+            { id: 12, num: "12", name: "Riserva", inField: false }
+          ],
+          away: [
+            { id: 101, num: "1", name: "POR", inField: true },
+            { id: 102, num: "2", name: "TS", inField: true },
+            { id: 103, num: "3", name: "DC", inField: true },
+            { id: 104, num: "4", name: "DC", inField: true },
+            { id: 105, num: "5", name: "TD", inField: true },
+            { id: 106, num: "6", name: "CC", inField: true },
+            { id: 107, num: "7", name: "COC", inField: true },
+            { id: 108, num: "8", name: "CDC", inField: true },
+            { id: 109, num: "9", name: "ED", inField: true },
+            { id: 110, num: "10", name: "ES", inField: true },
+            { id: 111, num: "11", name: "ATT", inField: true },
+            { id: 112, num: "12", name: "Riserva", inField: false }
+          ]
+        };
+        
+        renderRosters();
+        renderEvents();
+        localStorage.removeItem('app_state_v8');
+      }
+    }
+
+    function confirmEndMatch() {
+      if (confirm("Terminare e salvare definitivamente la partita nello storico?")) {
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('it-IT') + ' ' + now.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
+        const hName = document.getElementById('name-home').value;
+        const aName = document.getElementById('name-away').value;
+
+        const match = {
+          id: Date.now(),
+          title: `${hName} vs ${aName}`,
+          date: dateStr,
+          homeName: hName,
+          awayName: aName,
+          homeScore, awayScore, homePenalties, awayPenalties,
+          events: [...events]
+        };
+        matchHistory.unshift(match);
+        localStorage.setItem('match_history_v8', JSON.stringify(matchHistory));
+        alert("Partita archiviata con successo!");
+        confirmResetOnly();
+      }
+    }
+
+    function openHistoryModal() {
+      const content = document.getElementById('history-list-content');
+      if (matchHistory.length === 0) {
+        content.innerHTML = '<p style="color:var(--text-muted); text-align:center; padding:12px;">Nessuna partita archiviata.</p>';
+      } else {
+        content.innerHTML = matchHistory.map(m => `
+          <div class="history-card">
+            <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--text-muted);">
+              <span>📅 ${m.date}</span>
+              <span style="color:var(--accent-green); font-weight:bold;">${m.events.length} Eventi</span>
+            </div>
+            <div style="font-weight:900; text-align:center; font-size:1.05rem; margin:2px 0;">${m.title}</div>
+            <div style="font-weight:bold; text-align:center; font-size:0.95rem; color:#fff;">
+              ${m.homeName} ${m.homeScore} - ${m.awayScore} ${m.awayName}
+              ${m.homePenalties > 0 || m.awayPenalties > 0 ? `<small style="color:var(--accent-yellow); display:block;">(Rigori: ${m.homePenalties}-${m.awayPenalties})</small>` : ''}
+            </div>
+            <button class="btn-sec" style="background:var(--accent-green); color:#022c22; font-weight:900; border:none; padding:7px; margin-top:4px;" onclick="openDetailModal(${m.id})">📖 Apri Dettagli</button>
+          </div>
+        `).join('');
+      }
+      document.getElementById('history-modal').style.display = 'flex';
+    }
+
+    function openDetailModal(id) {
+      activeArchivedId = id;
+      const m = matchHistory.find(x => x.id === id);
+      if (!m) return;
+      document.getElementById('detail-title').value = m.title;
+      document.getElementById('detail-score').textContent = `${m.homeName} ${m.homeScore} - ${m.awayScore} ${m.awayName}`;
+      document.getElementById('detail-date').textContent = `Data: ${m.date}`;
+      if (m.homePenalties > 0 || m.awayPenalties > 0) {
+        document.getElementById('detail-pen').textContent = `Rigori: ${m.homePenalties} - ${m.awayPenalties}`;
+        document.getElementById('detail-pen').style.display = 'block';
+      } else {
+        document.getElementById('detail-pen').style.display = 'none';
+      }
+      const evList = document.getElementById('detail-events');
+      if (m.events.length === 0) {
+        evList.innerHTML = '<span style="color:var(--text-muted); font-size:0.75rem;">Nessun evento registrato.</span>';
+      } else {
+        evList.innerHTML = m.events.map(e => `
+          <div style="display:flex; justify-content:space-between; font-size:0.75rem; border-bottom:1px solid rgba(255,255,255,0.05); padding:3px 0;">
+            <span>${e.title} <small style="color:var(--text-muted);">(${e.sub})</small></span>
+            <span style="font-family:monospace; color:var(--accent-green); font-weight:bold;">${e.minute}</span>
+          </div>
+        `).join('');
+      }
+      closeModal('history-modal');
+      document.getElementById('match-detail-modal').style.display = 'flex';
+    }
+
+    function saveRenamedHistory() {
+      const m = matchHistory.find(x => x.id === activeArchivedId);
+      if (m) {
+        m.title = document.getElementById('detail-title').value.trim() || `${m.homeName} vs ${m.awayName}`;
+        localStorage.setItem('match_history_v8', JSON.stringify(matchHistory));
+        alert("Modifiche salvate!");
+      }
+    }
+
+    function deleteArchivedMatch() {
+      if (confirm("Eliminare definitivamente questa partita?")) {
+        matchHistory = matchHistory.filter(x => x.id !== activeArchivedId);
+        localStorage.setItem('match_history_v8', JSON.stringify(matchHistory));
+        closeModal('match-detail-modal');
+        openHistoryModal();
+      }
+    }
+
+    function buildShareSummary(title, hName, hScore, aName, aScore, hPen, aPen, evs) {
+      let text = `🏆 TABELLINO MATCH: ${title}\n`;
+      text += `⚽ ${hName} ${hScore} - ${aScore} ${aName}\n`;
+      if (hPen > 0 || aPen > 0) text += `👟 Sequenza Rigori: ${hPen} - ${aPen}\n`;
+      text += `\n📜 CRONACA COMPLETA:\n`;
+      if (evs.length === 0) {
+        text += `- Nessun evento registrato.\n`;
+      } else {
+        evs.slice().reverse().forEach(e => {
+          text += `• [${e.minute}] ${e.title} (${e.sub})\n`;
+        });
+      }
+      return text;
+    }
+
+    function shareCurrentMatch() {
+      const hName = document.getElementById('name-home').value;
+      const aName = document.getElementById('name-away').value;
+      const txt = buildShareSummary(`${hName} vs ${aName}`, hName, homeScore, aName, awayScore, homePenalties, awayPenalties, events);
+      if (navigator.share) navigator.share({ text: txt }).catch(() => {});
+      else { navigator.clipboard.writeText(txt); alert("Tabellino completo copiato negli appunti!"); }
+    }
+
+    function shareArchivedMatch() {
+      const m = matchHistory.find(x => x.id === activeArchivedId);
+      if (!m) return;
+      const txt = buildShareSummary(m.title, m.homeName, m.homeScore, m.awayName, m.awayScore, m.homePenalties, m.awayPenalties, m.events);
+      if (navigator.share) navigator.share({ text: txt }).catch(() => {});
+      else { navigator.clipboard.writeText(txt); alert("Tabellino archiviato copiato negli appunti!"); }
+    }
+
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    function saveState() {
+      const state = {
+        currentPeriod, periodLabelText, homeScore, awayScore, homePenalties, awayPenalties,
+        currentSeconds, durationSeconds, timerMode,
+        homeName: document.getElementById('name-home').value,
+        awayName: document.getElementById('name-away').value,
+        players, events
+      };
+      localStorage.setItem('app_state_v8', JSON.stringify(state));
+    }
+
+    function loadState() {
+      const saved = localStorage.getItem('app_state_v8');
+      if (saved) {
+        try {
+          const d = JSON.parse(saved);
+          homeScore = d.homeScore || 0; awayScore = d.awayScore || 0;
+          homePenalties = d.homePenalties || 0; awayPenalties = d.awayPenalties || 0;
+          document.getElementById('score-home').textContent = homeScore;
+          document.getElementById('score-away').textContent = awayScore;
+          if (homePenalties > 0) { document.getElementById('pen-home').textContent = `(Rig: ${homePenalties})`; document.getElementById('pen-home').style.display = 'block'; }
+          if (awayPenalties > 0) { document.getElementById('pen-away').textContent = `(Rig: ${awayPenalties})`; document.getElementById('pen-away').style.display = 'block'; }
+          if (d.homeName) document.getElementById('name-home').value = d.homeName;
+          if (d.awayName) document.getElementById('name-away').value = d.awayName;
+          if (d.players) players = d.players;
+          if (d.events) events = d.events;
+          if (d.durationSeconds) durationSeconds = d.durationSeconds;
+          if (d.currentSeconds !== undefined) currentSeconds = d.currentSeconds;
+          if (d.timerMode) setTimerMode(d.timerMode);
+          if (d.currentPeriod) selectPeriod(d.currentPeriod, d.periodLabelText || '1° Tempo');
+        } catch(e) {}
+      } else {
+        selectPeriod(1, '1° Tempo');
+      }
+      renderRosters();
+      renderEvents();
+      updateColors();
+    }
+
+    loadState();
+
+    // Attiva la modalità offline permanente
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>
