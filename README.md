@@ -37,7 +37,7 @@ Sviluppato come **Progressive Web App (PWA)** autonoma: non richiede installazio
   - Grazie al Service Worker integrato (`sw.js`), l'app funziona anche senza connessione dati o in modalità aereo.
   - Privacy totale: tutti i dati rimangono isolati nel `localStorage` del browser del singolo utente.
 
----
+
 ### 🆕 Aggiunte:
 - **Pagelle giocatori** (oggettive: calcolo basato su minutaggio di gioco effettivo ed azioni eseguite durante la partita).
 - **Timer per cambio Portiere** (se il sito è usato per match amichevoli senza portieri fissi).
