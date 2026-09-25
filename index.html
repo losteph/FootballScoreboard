@@ -16,6 +16,7 @@
       --accent-yellow: #f59e0b;
       --accent-red: #ef4444;
       --accent-purple: #8b5cf6;
+      --accent-cyan: #06b6d4;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --border: #24304f;
@@ -42,13 +43,13 @@
 
     .app-container {
       width: 100%;
-      max-width: 600px;
+      max-width: 650px;
       display: flex;
       flex-direction: column;
       gap: clamp(8px, 2vw, 14px);
     }
 
-    /* Header & Timer */
+    /* Header & Timers */
     .header {
       background: linear-gradient(145deg, var(--card-bg), var(--card-sub));
       border: 1px solid var(--border);
@@ -58,6 +59,7 @@
       justify-content: space-between;
       align-items: center;
       box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+      gap: 10px;
     }
 
     .header-left {
@@ -94,17 +96,49 @@
       border-radius: 8px;
     }
 
+    .timers-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
     .timer-display {
       font-family: "Courier New", Courier, monospace;
-      font-size: clamp(2rem, 7vw, 2.7rem);
+      font-size: clamp(1.9rem, 6.5vw, 2.6rem);
       font-weight: 900;
       color: var(--accent-green);
       letter-spacing: 1px;
       text-shadow: 0 0 12px rgba(16, 185, 129, 0.25);
     }
 
-    .timer-display.danger {
-      color: var(--accent-red);
+    .gk-timer-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: var(--card-accent);
+      padding: 6px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      min-width: 72px;
+    }
+
+    .gk-timer-label {
+      font-size: 0.6rem;
+      font-weight: 800;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+    }
+
+    .gk-timer-display {
+      font-family: monospace;
+      font-size: clamp(1rem, 3vw, 1.25rem);
+      font-weight: 900;
+      color: var(--accent-cyan);
+    }
+
+    .timer-display.danger, .gk-timer-display.danger {
+      color: var(--accent-red) !important;
       animation: pulse 0.8s infinite;
       text-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
     }
@@ -131,6 +165,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 8px;
+      flex-wrap: wrap;
     }
 
     .config-inputs {
@@ -174,6 +209,17 @@
     .toggle-btn.active {
       background: var(--accent-green);
       color: #022c22;
+    }
+
+    .team-color-select {
+      background: var(--card-sub);
+      border: 1px solid var(--border);
+      color: #fff;
+      font-size: 0.85rem;
+      padding: 2px 4px;
+      border-radius: 6px;
+      outline: none;
+      cursor: pointer;
     }
 
     /* Scoreboard */
@@ -331,14 +377,14 @@
     /* Roster Dual Columns */
     .roster-section {
       display: grid;
-      grid-template-columns: 1fr; /* Default per smartphone: colonna singola */
+      grid-template-columns: 1fr;
       gap: 10px;
       align-items: start;
     }
 
     @media (min-width: 520px) {
       .roster-section {
-        grid-template-columns: 1fr 1fr; /* Da 520px in su (PC o tablet): affiancate */
+        grid-template-columns: 1fr 1fr;
       }
     }
 
@@ -354,13 +400,8 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.25);
     }
 
-    .roster-card.home {
-      --team-border-color: var(--home-color);
-    }
-
-    .roster-card.away {
-      --team-border-color: var(--away-color);
-    }
+    .roster-card.home { --team-border-color: var(--home-color); }
+    .roster-card.away { --team-border-color: var(--away-color); }
 
     .roster-title {
       font-size: clamp(0.7rem, 2vw, 0.8rem);
@@ -399,16 +440,12 @@
     .player-left-info {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       flex: 1;
       cursor: pointer;
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
-    }
-
-    .player-left-info:hover {
-      opacity: 0.8;
     }
 
     .player-num-tag {
@@ -422,7 +459,7 @@
       background: var(--card-bg);
       border: 1px solid var(--border);
       color: var(--text-muted);
-      padding: 3px 6px;
+      padding: 3px 5px;
       border-radius: 6px;
       font-size: 0.65rem;
       font-weight: 800;
@@ -433,6 +470,23 @@
       background: rgba(16, 185, 129, 0.2);
       color: var(--accent-green);
       border-color: rgba(16, 185, 129, 0.4);
+    }
+
+    .gk-toggle {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 3px 5px;
+      border-radius: 6px;
+      font-size: 0.65rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .gk-toggle.active {
+      background: rgba(6, 182, 212, 0.25);
+      color: var(--accent-cyan);
+      border-color: var(--accent-cyan);
     }
 
     .btn-icon-del {
@@ -520,23 +574,24 @@
     /* Bottom Actions */
     .action-grid-bottom {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 6px;
     }
 
     .btn-action-main {
       background: var(--accent-purple);
       color: #fff;
       font-weight: 900;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       border: none;
-      padding: 12px;
+      padding: 10px 4px;
       border-radius: 12px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 4px;
+      text-align: center;
     }
 
     /* Modals */
@@ -557,7 +612,7 @@
       border: 1px solid var(--border);
       border-radius: 20px;
       width: 100%;
-      max-width: 440px;
+      max-width: 480px;
       padding: 16px;
       display: flex;
       flex-direction: column;
@@ -637,6 +692,56 @@
       flex-direction: column;
       gap: 6px;
     }
+
+    /* Pagelle Output in App */
+    .pagelle-box {
+      background: var(--card-sub);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .pagelle-team-title {
+      font-size: 0.8rem;
+      font-weight: 900;
+      color: var(--accent-green);
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 4px;
+      margin-top: 4px;
+    }
+
+    .pagella-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .pagella-vote {
+      font-weight: 900;
+      font-size: 0.88rem;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent-green);
+    }
+
+    .pagella-vote.sv {
+      background: rgba(148, 163, 184, 0.15);
+      color: var(--text-muted);
+    }
+
+    .pagella-details {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      margin-left: 4px;
+    }
   </style>
 </head>
 <body>
@@ -652,24 +757,42 @@
         </div>
         <span style="font-size:0.65rem; color:var(--text-muted);" id="timer-status-text">Conto alla Rovescia</span>
       </div>
-      <div class="timer-display" id="timer-display">15:00</div>
+      
+      <div class="timers-box">
+        <div class="timer-display" id="timer-display">15:00</div>
+        <!-- Riquadro Timer Portiere a Giro (Solo Display) -->
+        <div class="gk-timer-box" title="Timer cambio portiere a giro">
+          <span class="gk-timer-label">Porta 🧤</span>
+          <span class="gk-timer-display" id="gk-timer-display">05:00</span>
+        </div>
+      </div>
     </div>
 
     <!-- Timer Settings Bar -->
     <div class="config-bar">
       <div class="config-row">
-        <span style="font-weight:700; color:var(--text-muted);">Modalità Timer:</span>
+        <span style="font-weight:700; color:var(--text-muted);">Modalità Timer Partita:</span>
         <div class="toggle-group">
           <button id="mode-down" class="toggle-btn active" onclick="setTimerMode('countdown')">Rovescia ⏳</button>
           <button id="mode-up" class="toggle-btn" onclick="setTimerMode('countup')">Avanti ⏱️</button>
         </div>
       </div>
       <div class="config-row">
-        <span style="font-weight:700; color:var(--text-muted);">Durata Tempo:</span>
+        <span style="font-weight:700; color:var(--text-muted);">Durata Tempo Partita:</span>
         <div class="config-inputs">
           <input type="number" id="input-minutes" value="15" min="0" max="90">m
           <input type="number" id="input-seconds" value="00" min="0" max="59">s
           <button onclick="applyDurationSettings()" class="btn-sec" style="padding:4px 8px; font-size:0.7rem;">Set</button>
+        </div>
+      </div>
+      <!-- Config Giro Porta: tasto avvia, tasto reset, box minuti, tasto set -->
+      <div class="config-row">
+        <span style="font-weight:700; color:var(--accent-cyan);">Timer Giro Porta:</span>
+        <div class="config-inputs">
+          <button id="btn-gk-start-cfg" onclick="toggleGkTimer()" class="btn-sec" style="background:var(--accent-cyan); color:#082f49; font-weight:800; padding:4px 8px; font-size:0.7rem;">▶ Avvia</button>
+          <button onclick="resetGkTimer()" class="btn-sec" style="padding:4px 8px; font-size:0.7rem;">🔄 Reset</button>
+          <input type="number" id="input-gk-minutes" value="5" min="1" max="45">m
+          <button onclick="applyGkDurationSettings()" class="btn-sec" style="padding:4px 8px; font-size:0.7rem;">Set</button>
         </div>
       </div>
     </div>
@@ -679,7 +802,17 @@
       <!-- Casa -->
       <div class="team-card home" id="card-home">
         <div class="team-header-row">
-          <input type="color" id="picker-home" value="#3b82f6" style="width:20px;height:20px;border:none;background:none;cursor:pointer;" onchange="updateColors()">
+          <select id="color-home" class="team-color-select" onchange="updateColors()">
+            <option value="blue" selected>🔵</option>
+            <option value="red">🔴</option>
+            <option value="green">🟢</option>
+            <option value="yellow">🟡</option>
+            <option value="orange">🟠</option>
+            <option value="purple">🟣</option>
+            <option value="brown">🟤</option>
+            <option value="black">⚫</option>
+            <option value="white">⚪</option>
+          </select>
           <input type="text" id="name-home" value="CASA" class="team-name-input" onchange="saveState()">
         </div>
         <div class="score-container">
@@ -695,7 +828,17 @@
       <!-- Ospiti -->
       <div class="team-card away" id="card-away">
         <div class="team-header-row">
-          <input type="color" id="picker-away" value="#ef4444" style="width:20px;height:20px;border:none;background:none;cursor:pointer;" onchange="updateColors()">
+          <select id="color-away" class="team-color-select" onchange="updateColors()">
+            <option value="blue">🔵</option>
+            <option value="red" selected>🔴</option>
+            <option value="green">🟢</option>
+            <option value="yellow">🟡</option>
+            <option value="orange">🟠</option>
+            <option value="purple">🟣</option>
+            <option value="brown">🟤</option>
+            <option value="black">⚫</option>
+            <option value="white">⚪</option>
+          </select>
           <input type="text" id="name-away" value="OSPITI" class="team-name-input" onchange="saveState()">
         </div>
         <div class="score-container">
@@ -769,8 +912,9 @@
 
     <!-- Bottom Actions -->
     <div class="action-grid-bottom">
-      <button class="btn-action-main" style="background:#0ea5e9;" onclick="openHistoryModal()">📚 Storico Partite</button>
-      <button class="btn-action-main" onclick="shareCurrentMatch()">📲 Condividi Tabellino</button>
+      <button class="btn-action-main" style="background:#0ea5e9;" onclick="openHistoryModal()">📚 Storico</button>
+      <button class="btn-action-main" style="background:var(--accent-green); color:#022c22;" onclick="openPagelleModal()">⭐ Pagelle</button>
+      <button class="btn-action-main" onclick="shareCurrentMatch()">📲 Condividi</button>
     </div>
 
   </div>
@@ -796,15 +940,16 @@
         <select id="modal-p-assist" class="custom-select"><option value="">Nessun Assist</option></select>
       </div>
 
-      <!-- Action Grid Buttons -->
+      <!-- Action Grid Buttons (10 tasti perfettamente allineati a 2 a 2) -->
       <div class="action-grid">
         <button class="btn-act" style="background:var(--accent-green); color:#022c22;" onclick="triggerAction('GOL')">⚽ Gol</button>
         <button class="btn-act" style="background:#b91c1c; color:#fff;" onclick="triggerAction('AUTOGOL')">⭕ Autogol</button>
         <button class="btn-act" style="background:var(--accent-yellow); color:#451a03;" onclick="triggerAction('GIALLO')">🟨 Ammonizione</button>
         <button class="btn-act" style="background:var(--accent-red); color:#fff;" onclick="triggerAction('ROSSO')">🟥 Espulsione</button>
-        <button class="btn-act" style="background:#0284c7; color:#fff;" onclick="triggerAction('RIGORE_PARATO')">🧤 Rigore Parato</button>
         <button class="btn-act" style="background:#059669; color:#fff;" onclick="triggerAction('RIGORE_SEGNATO')">👟 Rigore Segnato</button>
-        <button class="btn-act" style="background:var(--card-sub); border:1px solid var(--border); color:#fff; grid-column: span 2;" onclick="triggerAction('FALLO')">⚠️ Fallo</button>
+        <button class="btn-act" style="background:#dc2626; color:#fff;" onclick="triggerAction('RIGORE_SBAGLIATO')">❌ Rigore Sbagliato</button>
+        <button class="btn-act" style="background:#0284c7; color:#fff;" onclick="triggerAction('RIGORE_PARATO')">🧤 Rigore Parato</button>
+        <button class="btn-act" style="background:var(--card-sub); border:1px solid var(--border); color:#fff;" onclick="triggerAction('FALLO')">⚠️ Fallo</button>
       </div>
 
       <!-- Substitution Box -->
@@ -817,6 +962,20 @@
       <div style="display:flex; justify-content:space-between; gap:8px; margin-top:8px;">
         <button class="btn-sec" style="flex:1; padding:8px;" onclick="closeModal('action-modal')">Chiudi</button>
         <button class="btn-sec" style="flex:1; padding:8px; border-color:var(--accent-green);" onclick="savePlayerEdit()">💾 Salva Info</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PAGELLE -->
+  <div class="modal-overlay" id="pagelle-modal">
+    <div class="modal-content">
+      <div class="modal-title">⭐ Pagelle della Partita</div>
+      <span style="font-size:0.7rem; color:var(--text-muted);">Azione a cronaca / gol subito o &ge;5m: Base 6. Vit +0.5, Sconf -0.5, Gol +1, Assist +0.5, Rig Parato +1.5, Rig Sbagliato -1.5, Autogol -1, Clean Sheet (&gt;15m POR) +1, Falli -0.5, Giallo -1, Rosso -2, Gol subito POR -0.5.</span>
+      <div class="pagelle-box" id="pagelle-container"></div>
+      
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-top:6px;">
+        <button class="btn-sec" style="background:var(--accent-green); color:#022c22; font-weight:bold; border:none; padding:10px;" onclick="copyPagelleText()">📋 Copia Pagelle</button>
+        <button class="btn-sec" style="padding:10px;" onclick="closeModal('pagelle-modal')">Chiudi</button>
       </div>
     </div>
   </div>
@@ -864,82 +1023,103 @@
   </div>
 
   <script>
+    const COLOR_MAP = {
+      blue:   { emoji: '🔵', hex: '#3b82f6' },
+      red:    { emoji: '🔴', hex: '#ef4444' },
+      green:  { emoji: '🟢', hex: '#10b981' },
+      yellow: { emoji: '🟡', hex: '#eab308' },
+      orange: { emoji: '🟠', hex: '#f97316' },
+      purple: { emoji: '🟣', hex: '#8b5cf6' },
+      brown:  { emoji: '🟤', hex: '#78350f' },
+      black:  { emoji: '⚫', hex: '#1e293b' },
+      white:  { emoji: '⚪', hex: '#f8fafc' }
+    };
+
     let timerInterval = null;
     let durationSeconds = 15 * 60;
     let currentSeconds = 15 * 60;
     let timerMode = 'countdown';
     let currentPeriod = 1;
     let periodLabelText = '1° Tempo';
+
+    // Timer Giro Porta (Indipendente)
+    let gkTimerInterval = null;
+    let gkDurationSeconds = 10 * 60;
+    let gkCurrentSeconds = 10 * 60;
+
     let homeScore = 0;
     let awayScore = 0;
     let homePenalties = 0;
     let awayPenalties = 0;
     let selectedPlayer = null;
     let activeArchivedId = null;
+    let initialLineup = null;
 
     let players = {
       home: [
-        { id: 1, num: "1", name: "POR", inField: true },
-        { id: 2, num: "2", name: "TS", inField: true },
-        { id: 3, num: "3", name: "DC", inField: true },
-        { id: 4, num: "4", name: "DC", inField: true },
-        { id: 5, num: "5", name: "TD", inField: true },
-        { id: 6, num: "6", name: "CC", inField: true },
-        { id: 7, num: "7", name: "COC", inField: true },
-        { id: 8, num: "8", name: "CDC", inField: true },
-        { id: 9, num: "9", name: "ED", inField: true },
-        { id: 10, num: "10", name: "ES", inField: true },
-        { id: 11, num: "11", name: "ATT", inField: true },
-        { id: 12, num: "12", name: "Riserva", inField: false }
+        { id: 1, num: "1", name: "POR", inField: true, isGK: true, playedSeconds: 0, gkPlayedSeconds: 0 },
+        { id: 2, num: "2", name: "TS", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+        { id: 3, num: "3", name: "DC", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+        { id: 4, num: "4", name: "DC", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+        { id: 5, num: "5", name: "TD", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+        { id: 6, num: "6", name: "CC", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+        { id: 7, num: "7", name: "COC", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+        { id: 8, num: "8", name: "CDC", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+        { id: 9, num: "9", name: "ED", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+        { id: 10, num: "10", name: "ES", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+        { id: 11, num: "11", name: "ATT", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+        { id: 12, num: "12", name: "Riserva", inField: false, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 }
       ],
       away: [
-        { id: 101, num: "1", name: "POR", inField: true },
-        { id: 102, num: "2", name: "TS", inField: true },
-        { id: 103, num: "3", name: "DC", inField: true },
-        { id: 104, num: "4", name: "DC", inField: true },
-        { id: 105, num: "5", name: "TD", inField: true },
-        { id: 106, num: "6", name: "CC", inField: true },
-        { id: 107, num: "7", name: "COC", inField: true },
-        { id: 108, num: "8", name: "CDC", inField: true },
-        { id: 109, num: "9", name: "ED", inField: true },
-        { id: 110, num: "10", name: "ES", inField: true },
-        { id: 111, num: "11", name: "ATT", inField: true },
-        { id: 112, num: "12", name: "Riserva", inField: false }
+        { id: 101, num: "1", name: "POR", inField: true, isGK: true, playedSeconds: 0, gkPlayedSeconds: 0 },
+        { id: 102, num: "2", name: "TS", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+        { id: 103, num: "3", name: "DC", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+        { id: 104, num: "4", name: "DC", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+        { id: 105, num: "5", name: "TD", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+        { id: 106, num: "6", name: "CC", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+        { id: 107, num: "7", name: "COC", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+        { id: 108, num: "8", name: "CDC", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+        { id: 109, num: "9", name: "ED", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+        { id: 110, num: "10", name: "ES", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+        { id: 111, num: "11", name: "ATT", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+        { id: 112, num: "12", name: "Riserva", inField: false, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 }
       ]
     };
 
     let events = [];
-    let matchHistory = JSON.parse(localStorage.getItem('match_history_v8') || '[]');
-
+    let matchHistory = JSON.parse(localStorage.getItem('match_history_v12') || '[]');
     let alertLoopInterval = null;
 
+    function playBeep(freq = 880, duration = 0.4) {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration + 0.05);
+      } catch (e) {}
+      if (navigator.vibrate) {
+        try { navigator.vibrate([200, 100, 200]); } catch (e) {}
+      }
+    }
+
     function playEndAlert() {
-      // Ferma eventuali allarmi precedenti
       stopEndAlert();
-      
-      const beep = () => {
-        try {
-          const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-          gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-          osc.start();
-          osc.stop(audioCtx.currentTime + 0.45);
-        } catch (e) {}
+      playBeep(880, 0.4);
+      alertLoopInterval = setInterval(() => playBeep(880, 0.4), 500);
+    }
 
-        if (navigator.vibrate) {
-          try { navigator.vibrate([200, 100, 200]); } catch (e) {}
-        }
-      };
-
-      // Suona subito e ripete ogni secondo
-      beep();
-      alertLoopInterval = setInterval(beep, 500);
+    function stopEndAlert() {
+      if (alertLoopInterval) {
+        clearInterval(alertLoopInterval);
+        alertLoopInterval = null;
+      }
     }
 
     function formatTime(sec) {
@@ -963,14 +1143,19 @@
       if (currentPeriod === 5) {
         el.textContent = "--:--";
         el.classList.remove('danger');
-        return;
-      }
-      el.textContent = formatTime(currentSeconds);
-      if (timerMode === 'countdown' && currentSeconds <= 10 && currentSeconds > 0) {
-        el.classList.add('danger');
       } else {
-        el.classList.remove('danger');
+        el.textContent = formatTime(currentSeconds);
+        if (timerMode === 'countdown' && currentSeconds <= 10 && currentSeconds > 0) el.classList.add('danger');
+        else el.classList.remove('danger');
       }
+      updateGkDisplayOnly();
+    }
+
+    function updateGkDisplayOnly() {
+      const gkEl = document.getElementById('gk-timer-display');
+      gkEl.textContent = formatTime(gkCurrentSeconds);
+      if (gkCurrentSeconds <= 15 && gkCurrentSeconds > 0) gkEl.classList.add('danger');
+      else gkEl.classList.remove('danger');
     }
 
     function setTimerMode(mode) {
@@ -979,8 +1164,6 @@
       document.getElementById('mode-down').classList.toggle('active', mode === 'countdown');
       document.getElementById('mode-up').classList.toggle('active', mode === 'countup');
       document.getElementById('timer-status-text').textContent = mode === 'countdown' ? 'Conto alla Rovescia' : 'In Avanti';
-      
-      // Converte il tempo senza azzerare
       currentSeconds = Math.max(0, durationSeconds - currentSeconds);
       updateTimerDisplay();
       saveState();
@@ -995,6 +1178,59 @@
       saveState();
     }
 
+    /* GESTIONE TIMER GIRO PORTA AUTONOMO */
+    function applyGkDurationSettings() {
+      const min = parseInt(document.getElementById('input-gk-minutes').value) || 10;
+      gkDurationSeconds = min * 60;
+      gkCurrentSeconds = gkDurationSeconds;
+      updateGkDisplayOnly();
+      saveState();
+    }
+
+    function resetGkTimer() {
+      if (gkTimerInterval) {
+        clearInterval(gkTimerInterval);
+        gkTimerInterval = null;
+        updateGkButtons(false);
+      }
+      gkCurrentSeconds = gkDurationSeconds;
+      updateGkDisplayOnly();
+      saveState();
+    }
+
+    function toggleGkTimer() {
+      if (gkTimerInterval) {
+        clearInterval(gkTimerInterval);
+        gkTimerInterval = null;
+        updateGkButtons(false);
+      } else {
+        gkTimerInterval = setInterval(() => {
+          if (gkCurrentSeconds > 0) {
+            gkCurrentSeconds--;
+            updateGkDisplayOnly();
+          } else {
+            clearInterval(gkTimerInterval);
+            gkTimerInterval = null;
+            updateGkButtons(false);
+            playBeep(600, 0.8);
+            alert("🔔 CAMBIO PORTIERE! È terminato il turno del portiere a giro.");
+          }
+          saveState();
+        }, 1000);
+        updateGkButtons(true);
+      }
+    }
+
+    function updateGkButtons(isRunning) {
+      const btnCfg = document.getElementById('btn-gk-start-cfg');
+      if (btnCfg) {
+        btnCfg.textContent = isRunning ? '⏸ Pausa' : '▶ Avvia';
+        btnCfg.style.background = isRunning ? 'var(--accent-yellow)' : 'var(--accent-cyan)';
+        btnCfg.style.color = isRunning ? '#451a03' : '#082f49';
+      }
+    }
+
+    /* TIMER PARTITA */
     function toggleTimer() {
       if (currentPeriod === 5) {
         alert("Nei Calci di Rigore il cronometro è disattivato.");
@@ -1007,33 +1243,34 @@
         btn.textContent = '▶ Avvia';
         btn.classList.remove('paused');
       } else {
+        if (currentPeriod === 1 && !initialLineup) {
+          initialLineup = JSON.parse(JSON.stringify(players));
+        }
         timerInterval = setInterval(() => {
+          ['home', 'away'].forEach(team => {
+            players[team].forEach(p => {
+              if (p.inField) {
+                p.playedSeconds = (p.playedSeconds || 0) + 1;
+                if (p.isGK) {
+                  p.gkPlayedSeconds = (p.gkPlayedSeconds || 0) + 1;
+                }
+              }
+            });
+          });
+
           if (timerMode === 'countdown') {
-            if (currentSeconds > 0) {
-              currentSeconds--;
-              updateTimerDisplay();
-            } else {
-              finishTimer();
-            }
+            if (currentSeconds > 0) currentSeconds--;
+            else finishTimer();
           } else {
-            if (currentSeconds < durationSeconds) {
-              currentSeconds++;
-              updateTimerDisplay();
-            } else {
-              finishTimer();
-            }
+            if (currentSeconds < durationSeconds) currentSeconds++;
+            else finishTimer();
           }
+
+          updateTimerDisplay();
           saveState();
         }, 1000);
         btn.textContent = '⏸ Pausa';
         btn.classList.add('paused');
-      }
-    }
-
-    function stopEndAlert() {
-      if (alertLoopInterval) {
-        clearInterval(alertLoopInterval);
-        alertLoopInterval = null;
       }
     }
 
@@ -1043,7 +1280,6 @@
       const btn = document.getElementById('btn-start');
       btn.textContent = '▶ Avvia';
       btn.classList.remove('paused');
-      
       playEndAlert();
       setTimeout(() => {
         alert(`⏰ FINE TEMPO (${periodLabelText})!`);
@@ -1075,8 +1311,15 @@
       }
     }
 
+    function getCurrentGoalkeeper(team) {
+      return players[team].find(p => p.isGK && p.inField) || players[team].find(p => p.isGK) || null;
+    }
+
     function quickGoal(team) {
       const teamName = document.getElementById(`name-${team}`).value;
+      const opposingTeam = team === 'home' ? 'away' : 'home';
+      const opposingGK = getCurrentGoalkeeper(opposingTeam);
+
       if (currentPeriod === 5) {
         if (team === 'home') {
           homePenalties++;
@@ -1096,7 +1339,12 @@
           awayScore++;
           document.getElementById('score-away').textContent = awayScore;
         }
-        logEvent(`⚽ GOL`, `Squadra: ${teamName}`, getElapsedFormatted(), team, false, 'GOL');
+        
+        let subText = `Squadra: ${teamName}`;
+        if (opposingGK) {
+          subText += ` • (Gol subito: #${opposingGK.num} ${opposingGK.name})`;
+        }
+        logEvent(`⚽ GOL`, subText, getElapsedFormatted(), team, false, 'GOL', null, opposingGK ? opposingGK.id : null);
       }
       saveState();
     }
@@ -1123,6 +1371,17 @@
       }
     }
 
+    function setGoalkeeper(team, idx) {
+      players[team].forEach((p, i) => {
+        p.isGK = (i === idx);
+      });
+      const p = players[team][idx];
+      const teamName = document.getElementById(`name-${team}`).value;
+      logEvent(`🧤 Cambio Portiere`, `Va in porta #${p.num} ${p.name} (Squadra: ${teamName})`, getElapsedFormatted(), team);
+      renderRosters();
+      saveState();
+    }
+
     function renderRosters() {
       ['home', 'away'].forEach(team => {
         const list = document.getElementById(`list-${team}`);
@@ -1135,6 +1394,9 @@
               <span class="player-num-tag">#${p.num}</span>
               <strong style="color:#fff;">${p.name}</strong>
             </div>
+            <button class="gk-toggle ${p.isGK ? 'active' : ''}" onclick="setGoalkeeper('${team}', ${idx})" title="Imposta come Portiere">
+              ${p.isGK ? '🧤 POR' : 'POR'}
+            </button>
             <button class="status-toggle ${p.inField ? 'field' : ''}" onclick="togglePlayerStatus('${team}', ${idx})">
               ${p.inField ? 'CAMPO' : 'PANCA'}
             </button>
@@ -1162,7 +1424,10 @@
         id: Date.now(),
         num: numIn.value.trim() || '?',
         name: nameIn.value.trim(),
-        inField: true
+        inField: true,
+        isGK: false,
+        playedSeconds: 0,
+        gkPlayedSeconds: 0
       });
       numIn.value = '';
       nameIn.value = '';
@@ -1229,6 +1494,11 @@
       pCurrent.inField = !pCurrent.inField;
       pTarget.inField = !pTarget.inField;
 
+      if (pCurrent.isGK && !pCurrent.inField) {
+        pCurrent.isGK = false;
+        pTarget.isGK = true;
+      }
+
       const inPlayer = pCurrent.inField ? pCurrent : pTarget;
       const outPlayer = pCurrent.inField ? pTarget : pCurrent;
 
@@ -1257,6 +1527,8 @@
       const assist = document.getElementById('modal-p-assist').value;
       const min = getElapsedFormatted();
       const isPen = currentPeriod === 5;
+      const opposingTeam = team === 'home' ? 'away' : 'home';
+      const opposingGK = getCurrentGoalkeeper(opposingTeam);
 
       p.num = document.getElementById('modal-p-num').value.trim() || p.num;
       p.name = document.getElementById('modal-p-name').value.trim() || p.name;
@@ -1266,37 +1538,38 @@
         if (isPen) {
           if (team === 'home') { homePenalties++; document.getElementById('pen-home').textContent = `(Rig: ${homePenalties})`; document.getElementById('pen-home').style.display = 'block'; }
           else { awayPenalties++; document.getElementById('pen-away').textContent = `(Rig: ${awayPenalties})`; document.getElementById('pen-away').style.display = 'block'; }
-          logEvent(`👟 Rigore Segnato da #${p.num} ${p.name}`, `Squadra: ${teamName}`, min, team, true, 'RIGORE_SEGNATO');
+          logEvent(`👟 Rigore Segnato da #${p.num} ${p.name}`, `Squadra: ${teamName}`, min, team, true, 'RIGORE_SEGNATO', p.id);
         } else {
           if (team === 'home') { homeScore++; document.getElementById('score-home').textContent = homeScore; }
           else { awayScore++; document.getElementById('score-away').textContent = awayScore; }
           let subText = `Squadra: ${teamName}`;
           if (assist && type === 'GOL') subText += ` • 🅰️ Assist: ${assist}`;
-          logEvent(type === 'GOL' ? `⚽ GOL! #${p.num} ${p.name}` : `👟 RIGORE SEGNATO! #${p.num} ${p.name}`, subText, min, team, false, type);
-        }} else if (type === 'AUTOGOL') {
-        const opposingTeam = team === 'home' ? 'away' : 'home';
+          if (opposingGK) subText += ` • (Gol subito: #${opposingGK.num} ${opposingGK.name})`;
+          logEvent(type === 'GOL' ? `⚽ GOL! #${p.num} ${p.name}` : `👟 RIGORE SEGNATO! #${p.num} ${p.name}`, subText, min, team, false, type, p.id, opposingGK ? opposingGK.id : null);
+        }
+      } else if (type === 'AUTOGOL') {
         const opposingTeamName = document.getElementById(`name-${opposingTeam}`).value;
-        
         if (opposingTeam === 'home') { homeScore++; document.getElementById('score-home').textContent = homeScore; }
         else { awayScore++; document.getElementById('score-away').textContent = awayScore; }
-        
-        logEvent(`⭕ AUTOGOL! #${p.num} ${p.name}`, `A favore di: ${opposingTeamName} (Squadra autore: ${teamName})`, min, opposingTeam, false, 'AUTOGOL');
+        logEvent(`⭕ AUTOGOL! #${p.num} ${p.name}`, `A favore di: ${opposingTeamName} (Squadra autore: ${teamName})`, min, opposingTeam, false, 'AUTOGOL', p.id);
       } else if (type === 'RIGORE_PARATO') {
-        logEvent(`🧤 Rigore Parato da #${p.num} ${p.name}`, `Squadra: ${teamName}`, min, team, isPen, 'RIGORE_PARATO');
+        logEvent(`🧤 Rigore Parato da #${p.num} ${p.name}`, `Squadra: ${teamName}`, min, team, isPen, 'RIGORE_PARATO', p.id);
+      } else if (type === 'RIGORE_SBAGLIATO') {
+        logEvent(`❌ Rigore Sbagliato da #${p.num} ${p.name}`, `Squadra: ${teamName}`, min, team, isPen, 'RIGORE_SBAGLIATO', p.id);
       } else if (type === 'GIALLO') {
-        logEvent(`🟨 Cartellino Giallo: #${p.num} ${p.name}`, `Squadra: ${teamName}`, min, team, false, 'GIALLO');
+        logEvent(`🟨 Cartellino Giallo: #${p.num} ${p.name}`, `Squadra: ${teamName}`, min, team, false, 'GIALLO', p.id);
       } else if (type === 'ROSSO') {
-        logEvent(`🟥 Cartellino Rosso (Espulso): #${p.num} ${p.name}`, `Squadra: ${teamName}`, min, team, false, 'ROSSO');
+        logEvent(`🟥 Cartellino Rosso (Espulso): #${p.num} ${p.name}`, `Squadra: ${teamName}`, min, team, false, 'ROSSO', p.id);
       } else if (type === 'FALLO') {
-        logEvent(`⚠️ Fallo commesso da #${p.num} ${p.name}`, `Squadra: ${teamName}`, min, team, false, 'FALLO');
-      } 
+        logEvent(`⚠️ Fallo commesso da #${p.num} ${p.name}`, `Squadra: ${teamName}`, min, team, false, 'FALLO', p.id);
+      }
 
       closeModal('action-modal');
       saveState();
     }
 
-    function logEvent(title, sub, minute, team = null, isPenalty = false, type = 'OTHER') {
-      events.unshift({ id: Date.now(), title, sub, minute, team, isPenalty, type });
+    function logEvent(title, sub, minute, team = null, isPenalty = false, type = 'OTHER', playerId = null, gkConcededId = null) {
+      events.unshift({ id: Date.now(), title, sub, minute, team, isPenalty, type, playerId, gkConcededId });
       renderEvents();
       saveState();
     }
@@ -1338,19 +1611,26 @@
       saveState();
     }
 
+    function getTeamEmoji(teamKey) {
+      const colorVal = document.getElementById(`color-${teamKey}`).value;
+      return COLOR_MAP[colorVal]?.emoji || '⚽';
+    }
+
     function updateColors() {
-      const hColor = document.getElementById('picker-home').value;
-      const aColor = document.getElementById('picker-away').value;
-      document.documentElement.style.setProperty('--home-color', hColor);
-      document.documentElement.style.setProperty('--away-color', aColor);
-      document.getElementById('card-home').style.setProperty('--team-border-color', hColor);
-      document.getElementById('card-away').style.setProperty('--team-border-color', aColor);
+      const hColorKey = document.getElementById('color-home').value;
+      const aColorKey = document.getElementById('color-away').value;
+      const hHex = COLOR_MAP[hColorKey]?.hex || '#3b82f6';
+      const aHex = COLOR_MAP[aColorKey]?.hex || '#ef4444';
+
+      document.documentElement.style.setProperty('--home-color', hHex);
+      document.documentElement.style.setProperty('--away-color', aHex);
+      document.getElementById('card-home').style.setProperty('--team-border-color', hHex);
+      document.getElementById('card-away').style.setProperty('--team-border-color', aHex);
 
       const rHome = document.getElementById('roster-card-home');
       const rAway = document.getElementById('roster-card-away');
-      if (rHome) rHome.style.setProperty('--team-border-color', hColor);
-      if (rAway) rAway.style.setProperty('--team-border-color', aColor);
-
+      if (rHome) rHome.style.setProperty('--team-border-color', hHex);
+      if (rAway) rAway.style.setProperty('--team-border-color', aHex);
       saveState();
     }
 
@@ -1358,6 +1638,9 @@
       if (confirm("Resettare la partita senza salvarla nello storico?")) {
         clearInterval(timerInterval);
         timerInterval = null;
+        if (gkTimerInterval) { clearInterval(gkTimerInterval); gkTimerInterval = null; }
+        updateGkButtons(false);
+
         homeScore = 0; awayScore = 0; homePenalties = 0; awayPenalties = 0; events = [];
         document.getElementById('score-home').textContent = '0';
         document.getElementById('score-away').textContent = '0';
@@ -1366,43 +1649,211 @@
         document.getElementById('btn-start').textContent = '▶ Avvia';
         document.getElementById('btn-start').classList.remove('paused');
         selectPeriod(1, '1° Tempo');
-        
-        // Ripristino formazioni standard (11 titolari con ruoli e riserva)
+        resetGkTimer();
+        initialLineup = null;
+
+        document.getElementById('name-home').value = 'CASA';
+        document.getElementById('name-away').value = 'OSPITI';
+        document.getElementById('color-home').value = 'blue';
+        document.getElementById('color-away').value = 'red';
+
         players = {
           home: [
-            { id: 1, num: "1", name: "POR", inField: true },
-            { id: 2, num: "2", name: "TS", inField: true },
-            { id: 3, num: "3", name: "DC", inField: true },
-            { id: 4, num: "4", name: "DC", inField: true },
-            { id: 5, num: "5", name: "TD", inField: true },
-            { id: 6, num: "6", name: "CC", inField: true },
-            { id: 7, num: "7", name: "COC", inField: true },
-            { id: 8, num: "8", name: "CDC", inField: true },
-            { id: 9, num: "9", name: "ED", inField: true },
-            { id: 10, num: "10", name: "ES", inField: true },
-            { id: 11, num: "11", name: "ATT", inField: true },
-            { id: 12, num: "12", name: "Riserva", inField: false }
+            { id: 1, num: "1", name: "POR", inField: true, isGK: true, playedSeconds: 0, gkPlayedSeconds: 0 },
+            { id: 2, num: "2", name: "TS", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+            { id: 3, num: "3", name: "DC", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+            { id: 4, num: "4", name: "DC", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+            { id: 5, num: "5", name: "TD", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+            { id: 6, num: "6", name: "CC", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+            { id: 7, num: "7", name: "COC", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+            { id: 8, num: "8", name: "CDC", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+            { id: 9, num: "9", name: "ED", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+            { id: 10, num: "10", name: "ES", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+            { id: 11, num: "11", name: "ATT", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+            { id: 12, num: "12", name: "Riserva", inField: false, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 }
           ],
           away: [
-            { id: 101, num: "1", name: "POR", inField: true },
-            { id: 102, num: "2", name: "TS", inField: true },
-            { id: 103, num: "3", name: "DC", inField: true },
-            { id: 104, num: "4", name: "DC", inField: true },
-            { id: 105, num: "5", name: "TD", inField: true },
-            { id: 106, num: "6", name: "CC", inField: true },
-            { id: 107, num: "7", name: "COC", inField: true },
-            { id: 108, num: "8", name: "CDC", inField: true },
-            { id: 109, num: "9", name: "ED", inField: true },
-            { id: 110, num: "10", name: "ES", inField: true },
-            { id: 111, num: "11", name: "ATT", inField: true },
-            { id: 112, num: "12", name: "Riserva", inField: false }
+            { id: 101, num: "1", name: "POR", inField: true, isGK: true, playedSeconds: 0, gkPlayedSeconds: 0 },
+            { id: 102, num: "2", name: "TS", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+            { id: 103, num: "3", name: "DC", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+            { id: 104, num: "4", name: "DC", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+            { id: 105, num: "5", name: "TD", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+            { id: 106, num: "6", name: "CC", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+            { id: 107, num: "7", name: "COC", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+            { id: 108, num: "8", name: "CDC", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+            { id: 109, num: "9", name: "ED", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+            { id: 110, num: "10", name: "ES", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+            { id: 111, num: "11", name: "ATT", inField: true, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 },
+            { id: 112, num: "12", name: "Riserva", inField: false, isGK: false, playedSeconds: 0, gkPlayedSeconds: 0 }
           ]
         };
-        
+
         renderRosters();
         renderEvents();
-        localStorage.removeItem('app_state_v8');
+        localStorage.removeItem('app_state_v12');
       }
+    }
+
+    /* Calcolo Oggettivo Pagelle: Azione presente, gol subito in porta, o >= 5m per voto */
+    function calculatePlayerRatings() {
+      const result = { home: [], away: [] };
+      const hWon = homeScore > awayScore;
+      const aWon = awayScore > homeScore;
+
+      ['home', 'away'].forEach(team => {
+        const teamWon = team === 'home' ? hWon : aWon;
+        const teamLost = team === 'home' ? aWon : hWon;
+
+        players[team].forEach(p => {
+          let goals = 0;
+          let assists = 0;
+          let fouls = 0;
+          let yellows = 0;
+          let reds = 0;
+          let penSaved = 0;
+          let penMissed = 0;
+          let ownGoals = 0;
+          let goalsConceded = 0;
+
+          events.forEach(e => {
+            if (e.playerId === p.id) {
+              if (!e.isPenalty && (e.type === 'GOL' || e.type === 'RIGORE_SEGNATO')) goals++;
+              if (e.type === 'AUTOGOL') ownGoals++;
+              if (e.type === 'FALLO') fouls++;
+              if (e.type === 'GIALLO') yellows++;
+              if (e.type === 'ROSSO') reds++;
+              if (e.type === 'RIGORE_PARATO') penSaved++;
+              if (e.type === 'RIGORE_SBAGLIATO') penMissed++;
+            }
+            if (e.type === 'GOL' && e.sub.includes(`Assist: #${p.num} ${p.name}`)) {
+              assists++;
+            }
+            if (!e.isPenalty && (e.type === 'GOL' || e.type === 'RIGORE_SEGNATO' || e.type === 'AUTOGOL') && e.gkConcededId === p.id) {
+              goalsConceded++;
+            }
+          });
+
+          // Un giocatore ha fatto un'azione se compare in almeno un evento attivo OPPURE se ha subito un gol in porta!
+          const hasAction = (goals > 0 || assists > 0 || fouls > 0 || yellows > 0 || reds > 0 || penSaved > 0 || penMissed > 0 || ownGoals > 0 || goalsConceded > 0);
+          const playedEnough = (p.playedSeconds || 0) >= 300; // >= 5 minuti
+
+          // Se NON ha fatto azioni, NON ha subito gol e NON ha giocato almeno 5m => S.V.
+          if (!hasAction && !playedEnough) {
+            result[team].push({
+              id: p.id,
+              num: p.num,
+              name: p.name,
+              score: 'S.V.',
+              details: 'Nessuna azione e meno di 5m giocati'
+            });
+            return;
+          }
+
+          let score = 6.0;
+          let details = [];
+
+          if (teamWon) { score += 0.5; details.push("+0.5 vittoria"); }
+          else if (teamLost) { score -= 0.5; details.push("-0.5 sconfitta"); }
+
+          if (goals > 0) { score += (goals * 1.0); details.push(`+${goals} gol`); }
+          if (assists > 0) { score += (assists * 0.5); details.push(`+${assists * 0.5} assist`); }
+          if (penSaved > 0) { score += (penSaved * 1.5); details.push(`+${penSaved * 1.5} rig. parato`); }
+          if (penMissed > 0) { score -= (penMissed * 1.5); details.push(`-${penMissed * 1.5} rig. sbagliato`); }
+          if (ownGoals > 0) { score -= (ownGoals * 1.0); details.push(`-${ownGoals} autogol`); }
+          if (yellows > 0) { score -= (yellows * 1.0); details.push(`-${yellows} giallo`); }
+          if (reds > 0) { score -= (reds * 2.0); details.push(`-${reds * 2} rosso`); }
+          
+          const foulMalus = Math.floor(fouls / 2) * 0.5;
+          if (foulMalus > 0) { score -= foulMalus; details.push(`-${foulMalus} (${fouls} falli)`); }
+          
+          const gkMalus = Math.floor(goalsConceded / 2) * 0.5;
+          if (gkMalus > 0) {
+            score -= gkMalus;
+            details.push(`-${gkMalus} (${goalsConceded} gol subiti da POR)`);
+          }
+
+          // Bonus Porta Inviolata (+1 se in porta >= 15m (900s) e 0 gol subiti)
+          const gkSeconds = p.gkPlayedSeconds || 0;
+          if (gkSeconds >= 900 && goalsConceded === 0) {
+            score += 1.0;
+            details.push(`+1.0 porta inviolata (≥15m)`);
+          }
+
+          score = Math.min(10.0, Math.max(1.0, score));
+
+          result[team].push({
+            id: p.id,
+            num: p.num,
+            name: p.name,
+            score: score.toFixed(1),
+            details: details.join(', ') || 'Nessun bonus/malus'
+          });
+        });
+      });
+
+      return result;
+    }
+
+    function openPagelleModal() {
+      const container = document.getElementById('pagelle-container');
+      const ratings = calculatePlayerRatings();
+      const hName = document.getElementById('name-home').value;
+      const aName = document.getElementById('name-away').value;
+      const hEmoji = getTeamEmoji('home');
+      const aEmoji = getTeamEmoji('away');
+
+      let html = `<div class="pagelle-team-title">${hEmoji} ${hName}</div>`;
+      ratings.home.forEach(p => {
+        html += `
+          <div class="pagella-row">
+            <div>
+              <strong>#${p.num} ${p.name}</strong>
+              <div class="pagella-details">${p.details}</div>
+            </div>
+            <span class="pagella-vote ${p.score === 'S.V.' ? 'sv' : ''}">${p.score}</span>
+          </div>
+        `;
+      });
+
+      html += `<div class="pagelle-team-title" style="margin-top:12px;">${aEmoji} ${aName}</div>`;
+      ratings.away.forEach(p => {
+        html += `
+          <div class="pagella-row">
+            <div>
+              <strong>#${p.num} ${p.name}</strong>
+              <div class="pagella-details">${p.details}</div>
+            </div>
+            <span class="pagella-vote ${p.score === 'S.V.' ? 'sv' : ''}">${p.score}</span>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+      document.getElementById('pagelle-modal').style.display = 'flex';
+    }
+
+    function copyPagelleText() {
+      const hName = document.getElementById('name-home').value;
+      const aName = document.getElementById('name-away').value;
+      const hEmoji = getTeamEmoji('home');
+      const aEmoji = getTeamEmoji('away');
+      const ratings = calculatePlayerRatings();
+
+      let text = `⭐ *PAGELLE MATCH*\n`;
+      text += `⚽ ${hName} ${homeScore} - ${awayScore} ${aName}\n\n`;
+
+      text += `${hEmoji} *${hName}*\n`;
+      ratings.home.forEach(p => {
+        text += `• _#${p.num} ${p.name}:_ *${p.score}*\n`;
+      });
+
+      text += `\n${aEmoji} *${aName}*\n`;
+      ratings.away.forEach(p => {
+        text += `• _#${p.num} ${p.name}:_ *${p.score}*\n`;
+      });
+
+      navigator.clipboard.writeText(text);
+      alert("Pagelle pulite copiate negli appunti!");
     }
 
     function confirmEndMatch() {
@@ -1419,10 +1870,13 @@
           homeName: hName,
           awayName: aName,
           homeScore, awayScore, homePenalties, awayPenalties,
+          homeColor: document.getElementById('color-home').value,
+          awayColor: document.getElementById('color-away').value,
+          players: JSON.parse(JSON.stringify(initialLineup || players)),
           events: [...events]
         };
         matchHistory.unshift(match);
-        localStorage.setItem('match_history_v8', JSON.stringify(matchHistory));
+        localStorage.setItem('match_history_v12', JSON.stringify(matchHistory));
         alert("Partita archiviata con successo!");
         confirmResetOnly();
       }
@@ -1441,7 +1895,7 @@
             </div>
             <div style="font-weight:900; text-align:center; font-size:1.05rem; margin:2px 0;">${m.title}</div>
             <div style="font-weight:bold; text-align:center; font-size:0.95rem; color:#fff;">
-              ${m.homeName} ${m.homeScore} - ${m.awayScore} ${m.awayName}
+              ${COLOR_MAP[m.homeColor]?.emoji || '🔵'} ${m.homeName} ${m.homeScore} - ${m.awayScore} ${m.awayName} ${COLOR_MAP[m.awayColor]?.emoji || '🔴'}
               ${m.homePenalties > 0 || m.awayPenalties > 0 ? `<small style="color:var(--accent-yellow); display:block;">(Rigori: ${m.homePenalties}-${m.awayPenalties})</small>` : ''}
             </div>
             <button class="btn-sec" style="background:var(--accent-green); color:#022c22; font-weight:900; border:none; padding:7px; margin-top:4px;" onclick="openDetailModal(${m.id})">📖 Apri Dettagli</button>
@@ -1483,7 +1937,7 @@
       const m = matchHistory.find(x => x.id === activeArchivedId);
       if (m) {
         m.title = document.getElementById('detail-title').value.trim() || `${m.homeName} vs ${m.awayName}`;
-        localStorage.setItem('match_history_v8', JSON.stringify(matchHistory));
+        localStorage.setItem('match_history_v12', JSON.stringify(matchHistory));
         alert("Modifiche salvate!");
       }
     }
@@ -1491,16 +1945,47 @@
     function deleteArchivedMatch() {
       if (confirm("Eliminare definitivamente questa partita?")) {
         matchHistory = matchHistory.filter(x => x.id !== activeArchivedId);
-        localStorage.setItem('match_history_v8', JSON.stringify(matchHistory));
+        localStorage.setItem('match_history_v12', JSON.stringify(matchHistory));
         closeModal('match-detail-modal');
         openHistoryModal();
       }
     }
 
-    function buildShareSummary(title, hName, hScore, aName, aScore, hPen, aPen, evs) {
+    function buildShareSummary(title, hName, hScore, aName, aScore, hPen, aPen, evs, currentPlayers, hEmoji, aEmoji) {
       let text = `🏆 TABELLINO MATCH: ${title}\n`;
-      text += `⚽ ${hName} ${hScore} - ${aScore} ${aName}\n`;
+      text += `⚽ ${hEmoji} ${hName} ${hScore} - ${aScore} ${aName} ${aEmoji}\n`;
       if (hPen > 0 || aPen > 0) text += `👟 Sequenza Rigori: ${hPen} - ${aPen}\n`;
+      
+      text += `\n👥 FORMAZIONI:\n`;
+      
+      const formatTeamLineup = (teamKey, name, emoji) => {
+        let block = `• ${emoji} *${name}*\n`;
+        const inField = currentPlayers[teamKey].filter(p => p.inField);
+        const bench = currentPlayers[teamKey].filter(p => !p.inField);
+
+        block += `  - In campo:\n`;
+        if (inField.length === 0) {
+          block += `    • Nessuno\n`;
+        } else {
+          inField.forEach(p => {
+            block += `    • #${p.num} ${p.name}${p.isGK ? ' (P)' : ''}\n`;
+          });
+        }
+
+        block += `  - Panchina:\n`;
+        if (bench.length === 0) {
+          block += `    • Nessuno\n`;
+        } else {
+          bench.forEach(p => {
+            block += `    • #${p.num} ${p.name}\n`;
+          });
+        }
+        return block;
+      };
+
+      text += formatTeamLineup('home', hName, hEmoji);
+      text += formatTeamLineup('away', aName, aEmoji);
+
       text += `\n📜 CRONACA COMPLETA:\n`;
       if (evs.length === 0) {
         text += `- Nessun evento registrato.\n`;
@@ -1515,15 +2000,19 @@
     function shareCurrentMatch() {
       const hName = document.getElementById('name-home').value;
       const aName = document.getElementById('name-away').value;
-      const txt = buildShareSummary(`${hName} vs ${aName}`, hName, homeScore, aName, awayScore, homePenalties, awayPenalties, events);
+      const hEmoji = getTeamEmoji('home');
+      const aEmoji = getTeamEmoji('away');
+      const txt = buildShareSummary(`${hName} vs ${aName}`, hName, homeScore, aName, awayScore, homePenalties, awayPenalties, events, initialLineup || players, hEmoji, aEmoji);
       if (navigator.share) navigator.share({ text: txt }).catch(() => {});
-      else { navigator.clipboard.writeText(txt); alert("Tabellino completo copiato negli appunti!"); }
+      else { navigator.clipboard.writeText(txt); alert("Tabellino completo con formazioni copiato negli appunti!"); }
     }
 
     function shareArchivedMatch() {
       const m = matchHistory.find(x => x.id === activeArchivedId);
       if (!m) return;
-      const txt = buildShareSummary(m.title, m.homeName, m.homeScore, m.awayName, m.awayScore, m.homePenalties, m.awayPenalties, m.events);
+      const hEmoji = COLOR_MAP[m.homeColor]?.emoji || '🔵';
+      const aEmoji = COLOR_MAP[m.awayColor]?.emoji || '🔴';
+      const txt = buildShareSummary(m.title, m.homeName, m.homeScore, m.awayName, m.awayScore, m.homePenalties, m.awayPenalties, m.events, m.players || players, hEmoji, aEmoji);
       if (navigator.share) navigator.share({ text: txt }).catch(() => {});
       else { navigator.clipboard.writeText(txt); alert("Tabellino archiviato copiato negli appunti!"); }
     }
@@ -1534,15 +2023,18 @@
       const state = {
         currentPeriod, periodLabelText, homeScore, awayScore, homePenalties, awayPenalties,
         currentSeconds, durationSeconds, timerMode,
+        gkCurrentSeconds, gkDurationSeconds,
         homeName: document.getElementById('name-home').value,
         awayName: document.getElementById('name-away').value,
-        players, events
+        homeColor: document.getElementById('color-home').value,
+        awayColor: document.getElementById('color-away').value,
+        players, initialLineup, events
       };
-      localStorage.setItem('app_state_v8', JSON.stringify(state));
+      localStorage.setItem('app_state_v12', JSON.stringify(state));
     }
 
     function loadState() {
-      const saved = localStorage.getItem('app_state_v8');
+      const saved = localStorage.getItem('app_state_v12');
       if (saved) {
         try {
           const d = JSON.parse(saved);
@@ -1554,10 +2046,15 @@
           if (awayPenalties > 0) { document.getElementById('pen-away').textContent = `(Rig: ${awayPenalties})`; document.getElementById('pen-away').style.display = 'block'; }
           if (d.homeName) document.getElementById('name-home').value = d.homeName;
           if (d.awayName) document.getElementById('name-away').value = d.awayName;
+          if (d.homeColor) document.getElementById('color-home').value = d.homeColor;
+          if (d.awayColor) document.getElementById('color-away').value = d.awayColor;
           if (d.players) players = d.players;
+          if (d.initialLineup) initialLineup = d.initialLineup;
           if (d.events) events = d.events;
           if (d.durationSeconds) durationSeconds = d.durationSeconds;
           if (d.currentSeconds !== undefined) currentSeconds = d.currentSeconds;
+          if (d.gkDurationSeconds) gkDurationSeconds = d.gkDurationSeconds;
+          if (d.gkCurrentSeconds !== undefined) gkCurrentSeconds = d.gkCurrentSeconds;
           if (d.timerMode) setTimerMode(d.timerMode);
           if (d.currentPeriod) selectPeriod(d.currentPeriod, d.periodLabelText || '1° Tempo');
         } catch(e) {}
@@ -1567,11 +2064,11 @@
       renderRosters();
       renderEvents();
       updateColors();
+      updateGkDisplayOnly();
     }
 
     loadState();
 
-    // Attiva la modalità offline permanente
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').catch(() => {});
