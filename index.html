@@ -759,7 +759,7 @@
       </div>
       
       <div class="timers-box">
-        <div class="timer-display" id="timer-display">15:00</div>
+        <div class="timer-display" id="timer-display">30:00</div> 
         <!-- Riquadro Timer Portiere a Giro (Solo Display) -->
         <div class="gk-timer-box" title="Timer cambio portiere a giro">
           <span class="gk-timer-label">Porta 🧤</span>
@@ -949,7 +949,10 @@
         <button class="btn-act" style="background:#059669; color:#fff;" onclick="triggerAction('RIGORE_SEGNATO')">👟 Rigore Segnato</button>
         <button class="btn-act" style="background:#dc2626; color:#fff;" onclick="triggerAction('RIGORE_SBAGLIATO')">❌ Rigore Sbagliato</button>
         <button class="btn-act" style="background:#0284c7; color:#fff;" onclick="triggerAction('RIGORE_PARATO')">🧤 Rigore Parato</button>
+        <button class="btn-act" style="background:#7f1d1d; color:#fff;" onclick="triggerAction('BIG_CHANCE_MISSED')">🤦 Big Chance Missed</button>
         <button class="btn-act" style="background:var(--card-sub); border:1px solid var(--border); color:#fff;" onclick="triggerAction('FALLO')">⚠️ Fallo</button>
+        <button class="btn-act" style="background:#475569; color:#fff;" onclick="triggerAction('ERRORE')">📉 Errore Generico</button>
+        
       </div>
 
       <!-- Substitution Box -->
@@ -976,6 +979,30 @@
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-top:6px;">
         <button class="btn-sec" style="background:var(--accent-green); color:#022c22; font-weight:bold; border:none; padding:10px;" onclick="copyPagelleText()">📋 Copia Pagelle</button>
         <button class="btn-sec" style="padding:10px;" onclick="closeModal('pagelle-modal')">Chiudi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL SCELTA CONDIVISIONE CRONACA -->
+  <div class="modal-overlay" id="share-choice-modal">
+    <div class="modal-content" style="max-width:360px; text-align:center;">
+      <div class="modal-title">📲 Condividi Tabellino</div>
+      <p style="font-size:0.75rem; color:var(--text-muted); margin:4px 0 8px 0;">
+        Scegli quale formato di cronaca esportare:
+      </p>
+
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <button class="btn-sec" style="background:var(--accent-green); color:#022c22; font-weight:900; border:none; padding:12px; font-size:0.85rem;" onclick="processShare(true)">
+          🌟 Solo Azioni Salienti<br>
+          <small style="font-size:0.65rem; font-weight:normal; opacity:0.85;">Gol, Rigori, Cartellini, Falli</small>
+        </button>
+
+        <button class="btn-sec" style="background:var(--card-sub); border:1px solid var(--border); color:#fff; font-weight:700; padding:10px; font-size:0.8rem;" onclick="processShare(false)">
+          📜 Cronaca Completa<br>
+          <small style="font-size:0.65rem; color:var(--text-muted);">Include anche errori e cambi porta</small>
+        </button>
+
+        <button class="btn-sec" style="padding:8px; margin-top:4px;" onclick="closeModal('share-choice-modal')">Annulla</button>
       </div>
     </div>
   </div>
@@ -1036,16 +1063,16 @@
     };
 
     let timerInterval = null;
-    let durationSeconds = 15 * 60;
-    let currentSeconds = 15 * 60;
+    let durationSeconds = 30 * 60;
+    let currentSeconds = 30 * 60;
     let timerMode = 'countdown';
     let currentPeriod = 1;
     let periodLabelText = '1° Tempo';
 
     // Timer Giro Porta (Indipendente)
     let gkTimerInterval = null;
-    let gkDurationSeconds = 10 * 60;
-    let gkCurrentSeconds = 10 * 60;
+    let gkDurationSeconds = 5 * 60;
+    let gkCurrentSeconds = 5 * 60;
 
     let homeScore = 0;
     let awayScore = 0;
@@ -1087,7 +1114,7 @@
     };
 
     let events = [];
-    let matchHistory = JSON.parse(localStorage.getItem('match_history_v12') || '[]');
+    let matchHistory = JSON.parse(localStorage.getItem('match_history_v13') || '[]');
     let alertLoopInterval = null;
 
     function playBeep(freq = 880, duration = 0.4) {
@@ -1562,6 +1589,10 @@
         logEvent(`🟥 Cartellino Rosso (Espulso): #${p.num} ${p.name}`, `Squadra: ${teamName}`, min, team, false, 'ROSSO', p.id);
       } else if (type === 'FALLO') {
         logEvent(`⚠️ Fallo commesso da #${p.num} ${p.name}`, `Squadra: ${teamName}`, min, team, false, 'FALLO', p.id);
+      } else if (type === 'ERRORE') {
+        logEvent(`⚠️ Palla persa / Errore di #${p.num} ${p.name}`, `Squadra: ${teamName}`, min, team, false, 'ERRORE', p.id);
+      } else if (type === 'BIG_CHANCE_MISSED') {
+        logEvent(`🤦 Gol divorato / Errore grave da #${p.num} ${p.name}`, `Squadra: ${teamName}`, min, team, false, 'BIG_CHANCE_MISSED', p.id);
       }
 
       closeModal('action-modal');
@@ -1690,7 +1721,7 @@
 
         renderRosters();
         renderEvents();
-        localStorage.removeItem('app_state_v12');
+        localStorage.removeItem('app_state_v13');
       }
     }
 
@@ -1714,6 +1745,8 @@
           let penMissed = 0;
           let ownGoals = 0;
           let goalsConceded = 0;
+          let errors = 0;
+          let bigMisses = 0;
 
           events.forEach(e => {
             if (e.playerId === p.id) {
@@ -1724,6 +1757,8 @@
               if (e.type === 'ROSSO') reds++;
               if (e.type === 'RIGORE_PARATO') penSaved++;
               if (e.type === 'RIGORE_SBAGLIATO') penMissed++;
+              if (e.type === 'ERRORE') errors++;
+              if (e.type === 'BIG_CHANCE_MISSED') bigMisses++;
             }
             if (e.type === 'GOL' && e.sub.includes(`Assist: #${p.num} ${p.name}`)) {
               assists++;
@@ -1734,7 +1769,7 @@
           });
 
           // Un giocatore ha fatto un'azione se compare in almeno un evento attivo OPPURE se ha subito un gol in porta!
-          const hasAction = (goals > 0 || assists > 0 || fouls > 0 || yellows > 0 || reds > 0 || penSaved > 0 || penMissed > 0 || ownGoals > 0 || goalsConceded > 0);
+          const hasAction = (goals > 0 || assists > 0 || fouls > 0 || yellows > 0 || reds > 0 || penSaved > 0 || penMissed > 0 || ownGoals > 0 || goalsConceded > 0 || errors > 0 || bigMisses > 0);
           const playedEnough = (p.playedSeconds || 0) >= 300; // >= 5 minuti
 
           // Se NON ha fatto azioni, NON ha subito gol e NON ha giocato almeno 5m => S.V.
@@ -1777,6 +1812,20 @@
           if (gkSeconds >= 900 && goalsConceded === 0) {
             score += 1.0;
             details.push(`+1.0 porta inviolata (≥15m)`);
+          }
+
+          // Malus Errori Generici: -0.5 ogni 2
+          const errorMalus = Math.floor(errors / 2) * 0.5;
+          if (errorMalus > 0) {
+            score -= errorMalus;
+            details.push(`-${errorMalus} (${errors} errori)`);
+          }
+
+          // Malus Gol Divorato / Errore Grave: -0.5 a ogni evento
+          if (bigMisses > 0) {
+            const missMalus = bigMisses * 0.5; // (se vuoi togliere 1.0 secco metti: bigMisses * 1.0)
+            score -= missMalus;
+            details.push(`-${missMalus} (${bigMisses} errori gravi)`);
           }
 
           score = Math.min(10.0, Math.max(1.0, score));
@@ -1876,9 +1925,8 @@
           events: [...events]
         };
         matchHistory.unshift(match);
-        localStorage.setItem('match_history_v12', JSON.stringify(matchHistory));
+        localStorage.setItem('match_history_v13', JSON.stringify(matchHistory));
         alert("Partita archiviata con successo!");
-        confirmResetOnly();
       }
     }
 
@@ -1937,7 +1985,7 @@
       const m = matchHistory.find(x => x.id === activeArchivedId);
       if (m) {
         m.title = document.getElementById('detail-title').value.trim() || `${m.homeName} vs ${m.awayName}`;
-        localStorage.setItem('match_history_v12', JSON.stringify(matchHistory));
+        localStorage.setItem('match_history_v13', JSON.stringify(matchHistory));
         alert("Modifiche salvate!");
       }
     }
@@ -1945,19 +1993,20 @@
     function deleteArchivedMatch() {
       if (confirm("Eliminare definitivamente questa partita?")) {
         matchHistory = matchHistory.filter(x => x.id !== activeArchivedId);
-        localStorage.setItem('match_history_v12', JSON.stringify(matchHistory));
+        localStorage.setItem('match_history_v13', JSON.stringify(matchHistory));
         closeModal('match-detail-modal');
         openHistoryModal();
       }
     }
 
-    function buildShareSummary(title, hName, hScore, aName, aScore, hPen, aPen, evs, currentPlayers, hEmoji, aEmoji) {
+    // Aggiungi onlyHighlights = false alla fine dei parametri:
+    function buildShareSummary(title, hName, hScore, aName, aScore, hPen, aPen, evs, currentPlayers, hEmoji, aEmoji, onlyHighlights = false) {
       let text = `🏆 TABELLINO MATCH: ${title}\n`;
       text += `⚽ ${hEmoji} ${hName} ${hScore} - ${aScore} ${aName} ${aEmoji}\n`;
       if (hPen > 0 || aPen > 0) text += `👟 Sequenza Rigori: ${hPen} - ${aPen}\n`;
-      
+  
       text += `\n👥 FORMAZIONI:\n`;
-      
+  
       const formatTeamLineup = (teamKey, name, emoji) => {
         let block = `• ${emoji} *${name}*\n`;
         const inField = currentPlayers[teamKey].filter(p => p.inField);
@@ -1979,32 +2028,65 @@
           bench.forEach(p => {
             block += `    • #${p.num} ${p.name}\n`;
           });
-        }
+       }
         return block;
       };
 
       text += formatTeamLineup('home', hName, hEmoji);
       text += formatTeamLineup('away', aName, aEmoji);
 
-      text += `\n📜 CRONACA COMPLETA:\n`;
-      if (evs.length === 0) {
-        text += `- Nessun evento registrato.\n`;
+      // Intestazione dinamica
+      text += onlyHighlights ? `\n📜 AZIONI SALIENTI:\n` : `\n📜 CRONACA COMPLETA:\n`;
+
+      // Tipi considerati "Salienti"
+      const salienti = ['GOL', 'RIGORE_SEGNATO', 'RIGORE_SBAGLIATO', 'RIGORE_PARATO', 'AUTOGOL', 'GIALLO', 'ROSSO', 'FALLO'];
+
+      // Applica il filtro se onlyHighlights è true
+      const filteredEvents = onlyHighlights 
+        ? evs.filter(e => salienti.includes(e.type)) 
+        : evs;
+
+      if (filteredEvents.length === 0) {
+        text += `- Nessun evento ${onlyHighlights ? 'saliente ' : ''}registrato.\n`;
       } else {
-        evs.slice().reverse().forEach(e => {
+        filteredEvents.slice().reverse().forEach(e => {
           text += `• [${e.minute}] ${e.title} (${e.sub})\n`;
         });
       }
       return text;
     }
 
+    // 1. Cliccando "Condividi" apri il modal di scelta
     function shareCurrentMatch() {
+      document.getElementById('share-choice-modal').style.display = 'flex';
+    }
+
+    // 2. Questa funzione genera il testo in base al pulsante premuto
+    function processShare(onlyHighlights) {
+      closeModal('share-choice-modal');
+
       const hName = document.getElementById('name-home').value;
       const aName = document.getElementById('name-away').value;
       const hEmoji = getTeamEmoji('home');
       const aEmoji = getTeamEmoji('away');
-      const txt = buildShareSummary(`${hName} vs ${aName}`, hName, homeScore, aName, awayScore, homePenalties, awayPenalties, events, initialLineup || players, hEmoji, aEmoji);
-      if (navigator.share) navigator.share({ text: txt }).catch(() => {});
-      else { navigator.clipboard.writeText(txt); alert("Tabellino completo con formazioni copiato negli appunti!"); }
+
+      const txt = buildShareSummary(
+        `${hName} vs ${aName}`,
+        hName, homeScore,
+        aName, awayScore,
+        homePenalties, awayPenalties,
+        events,
+        initialLineup || players,
+        hEmoji, aEmoji,
+        onlyHighlights // <-- Passa la scelta (true o false)
+      );
+
+      if (navigator.share) {
+        navigator.share({ text: txt }).catch(() => {});
+      } else {
+        navigator.clipboard.writeText(txt);
+        alert(onlyHighlights ? "Tabellino (Azioni Salienti) copiato!" : "Tabellino Completo copiato!");
+      }
     }
 
     function shareArchivedMatch() {
@@ -2030,11 +2112,11 @@
         awayColor: document.getElementById('color-away').value,
         players, initialLineup, events
       };
-      localStorage.setItem('app_state_v12', JSON.stringify(state));
+      localStorage.setItem('app_state_v13', JSON.stringify(state));
     }
 
     function loadState() {
-      const saved = localStorage.getItem('app_state_v12');
+      const saved = localStorage.getItem('app_state_v13');
       if (saved) {
         try {
           const d = JSON.parse(saved);
@@ -2071,7 +2153,20 @@
 
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(() => {});
+        navigator.serviceWorker.register('./sw.js').then((reg) => {
+          // Forza il controllo di nuovi aggiornamenti ogni volta che apri l'app
+          reg.update();
+
+          reg.onupdatefound = () => {
+            const installingWorker = reg.installing;
+            installingWorker.onstatechange = () => {
+              if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // Appena rileva modifiche, si aggiorna da sola
+                window.location.reload();
+              }
+            };
+          };
+        }).catch(() => {});
       });
     }
   </script>
